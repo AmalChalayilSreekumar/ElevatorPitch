@@ -1,53 +1,64 @@
-import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+// main.js
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { initScene } from './core/scene.js';
+import { lookControlsPC } from './player/movement.js';
 
 
+const { scene, camera, renderer } = initScene();
 
-// Draco loader
-const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('/draco/')
+// --- DRACO + GLTF loader setup ---
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/draco/');
 
-const loader = new GLTFLoader()
-loader.setDRACOLoader(dracoLoader)
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
 
-let elevator
+let elevator;
 
-loader.load(
-  '/blenderFiles/Elevator/ElevatorMain.glb',
-  (gltf) => {
-    elevator = gltf.scene
 
-    const box = new THREE.Box3().setFromObject(elevator)
-    const center = box.getCenter(new THREE.Vector3())
-    elevator.position.sub(center)
+  loader.load('/blenderFiles/Elevator/ElevatorMain.glb', (gltf) => {
+    elevator = gltf.scene;
 
-    // Log size so we can check if camera needs adjusting
-    const size = box.getSize(new THREE.Vector3())
-    console.log('Model size:', size)
+    // Override every mesh's material roughness after loading
+    elevator.traverse((child) => {
+    
+      if (child.isMesh) {
+        child.material.roughness = 0.3;
+        child.material.metalness = 0.9;
+      }
+      console.log(child.parent)
+    });
 
-    scene.add(elevator)
+    elevator.position.set(0,1.7,0)
+    scene.add(elevator);
   },
   (progress) => {
-    console.log('Loading:', Math.round((progress.loaded / progress.total) * 100) + '%')
+    console.log('Loading:', Math.round((progress.loaded / progress.total) * 100) + '%');
   },
   (error) => {
-    console.error('Error:', error)
+    console.error('Error:', error);
   }
-)
+);
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
-})
+// --- Floor ---
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(40, 40),
+  new THREE.MeshLambertMaterial({ color: 0x888888 })
+);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
 
+lookControlsPC(camera, renderer);
+
+
+// --- Game loop ---
 function animate() {
-  requestAnimationFrame(animate)
-  if (elevator) elevator.rotation.y += 0.005
-  controls.update()
-  renderer.render(scene, camera)
+  requestAnimationFrame(animate);
+  // camera.rotation.x = 0.5
+  renderer.render(scene, camera);
 }
 
-animate()
+animate();
