@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { createPlayerCollisions } from './collisions.js';
 
 export function lookControlsPC(camera, renderer) {
   const sensitivity = 0.002;
@@ -26,8 +27,9 @@ export function lookControlsPC(camera, renderer) {
   });
 }
 
-export function movementPC(camera) {
+export function movementPC(camera, scene) {
   const keys = {};
+  const { resolveCollisions } = createPlayerCollisions(scene);  // ← init collisions
 
   document.addEventListener('keydown', (e) => { keys[e.code] = true; });
   document.addEventListener('keyup',   (e) => { keys[e.code] = false; });
@@ -47,10 +49,11 @@ export function movementPC(camera) {
     if (keys['KeyD'] || keys['ArrowRight'])
         direction.x += 0.2;
 
-    // Move relative to where the camera is facing
     direction.applyEuler(camera.rotation);
     direction.y = 0;
 
-    camera.position.addScaledVector(direction, speed);
+    // ↓ only change — resolve before applying
+    const safe = resolveCollisions(camera, direction);
+    camera.position.addScaledVector(safe, speed);  // ← was: direction
   }
 }

@@ -30,25 +30,8 @@ export function initScene() {
   camera.rotation.order = 'YXZ';            // critical for FPS look
 
 // Soft fill light — prevents everything from being pitch black
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
-
-// Directional light — acts like the sun, creates shadows
-// const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
-// dirLight.position.set(0, 10, 0);
-// scene.add(dirLight);
-
-//   const sun = new THREE.DirectionalLight(0xffffff, 1.0);
-//   sun.position.set(0, 60, 100);
-//   sun.castShadow = true;
-//   sun.shadow.mapSize.set(2048, 2048);
-//   sun.shadow.camera.near = 0.5;
-//   sun.shadow.camera.far = 200;
-//   sun.shadow.camera.left = -50;
-//   sun.shadow.camera.right = 50;
-//   sun.shadow.camera.top = 50;
-//   sun.shadow.camera.bottom = -50;
-//   scene.add(sun);
 
   // --- Resize handler ---
   window.addEventListener('resize', () => {
