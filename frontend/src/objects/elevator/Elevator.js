@@ -5,7 +5,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const pathToElevator = "./../../../blenderFiles/Elevator/ElevatorTest.glb"
 
 // function openDoors(elevator, gltf){
 //     const mixer = new THREE.AnimationMixer(elevator);
@@ -14,7 +13,7 @@ const pathToElevator = "./../../../blenderFiles/Elevator/ElevatorTest.glb"
 //         // Play the very first animation track found in the file
         // const action = mixer.clipAction(gltf.animations[0]);
         // action.play();
-//     } else if (i<2){
+//     } else if (i==1){
 //         console.log("No animation");
 //         i+=1
 //     }
@@ -31,7 +30,7 @@ export function createElevator(renderer, scene){
     let elevator;
 
 
-    loader.load(pathToElevator, (gltf) => {
+    loader.load("./../../../blenderFiles/Elevator/ElevatorMain.glb", (gltf) => {
         elevator = gltf.scene;
 
         const mixer = new THREE.AnimationMixer(elevator);

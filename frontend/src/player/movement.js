@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { createPlayerCollisions } from './collisions.js';
 
+
+
 export function lookControlsPC(camera, renderer) {
   const sensitivity = 0.002;
 
@@ -24,6 +26,7 @@ export function lookControlsPC(camera, renderer) {
     camera.rotation.order = 'YXZ'; 
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
+    return [camera.rotation.y, camera.rotation.x, camera.rotation.z]; 
   });
 }
 

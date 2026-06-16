@@ -7,9 +7,16 @@ import { lookControlsPC, movementPC } from './player/movement.js';
 import { createElevator} from './objects/elevator/Elevator.js';
 
 
+
 const { scene, camera, renderer } = initScene();
 
 const elevator = createElevator(renderer, scene)
+
+// function loadInElevatorPitch(container){
+//   const text = "Text is being read"
+
+
+// }
 
 // --- Floor ---
 const floor = new THREE.Mesh(
@@ -23,9 +30,12 @@ scene.add(floor);
 lookControlsPC(camera, renderer);
 const updateMovement = movementPC(camera, scene);
 
+
 function animate() {
   requestAnimationFrame(animate);
   updateMovement();
+
+
   renderer.render(scene, camera);
 }
 
