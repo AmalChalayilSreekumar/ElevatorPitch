@@ -26,7 +26,6 @@ export function lookControlsPC(camera, renderer) {
     camera.rotation.order = 'YXZ'; 
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
-    return [camera.rotation.y, camera.rotation.x, camera.rotation.z]; 
   });
 }
 
