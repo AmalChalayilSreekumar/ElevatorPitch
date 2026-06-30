@@ -4,13 +4,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { initScene } from './core/scene.js';
 import { lookControlsPC, movementPC } from './player/movement.js';
-import { createElevator} from './objects/elevator/Elevator.js';
+import { createElevator } from './objects/elevator/Elevator.js';
+import { objectInteraction } from './player/objectInteractions.js';
 
 
 
 const { scene, camera, renderer } = initScene();
 
-const elevator = createElevator(renderer, scene)
+const elevator = createElevator(renderer, scene);
 
 // function loadInElevatorPitch(container){
 //   const text = "Text is being read"
@@ -30,13 +31,15 @@ scene.add(floor);
 lookControlsPC(camera, renderer);
 const updateMovement = movementPC(camera, scene);
 
+const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
+
+
 
 function animate() {
   requestAnimationFrame(animate);
   updateMovement();
-
-
-  renderer.render(scene, camera);
+  updateOutline();
+  composer.render();
 }
 
 animate();

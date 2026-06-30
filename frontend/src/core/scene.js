@@ -30,7 +30,7 @@ export function initScene() {
   camera.rotation.order = 'YXZ';            // critical for FPS look
 
 // Soft fill light — prevents everything from being pitch black
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
   // --- Resize handler ---
