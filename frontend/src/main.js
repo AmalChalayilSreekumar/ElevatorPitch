@@ -13,11 +13,6 @@ const { scene, camera, renderer } = initScene();
 
 const elevator = createElevator(renderer, scene);
 
-// function loadInElevatorPitch(container){
-//   const text = "Text is being read"
-
-
-// }
 
 // --- Floor ---
 const floor = new THREE.Mesh(
