@@ -33,7 +33,7 @@ const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
 function animate() {
   requestAnimationFrame(animate);
   updateMovement();
-  updateOutline();
+  console.log(updateOutline());
   composer.render();
 }
 

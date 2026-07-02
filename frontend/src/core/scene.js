@@ -26,11 +26,11 @@ export function initScene() {
   const camera = new THREE.PerspectiveCamera(fov, aspectRatio, nearCPlane, farCPlane);
   const xPos = 0, yPos = 1.7, zPos = 2.5;
 
-  camera.position.set(xPos, yPos, zPos);           // eye height
-  camera.rotation.order = 'YXZ';            // critical for FPS look
+  camera.position.set(xPos, yPos, zPos);
+  camera.rotation.order = 'YXZ';           
 
 // Soft fill light — prevents everything from being pitch black
-const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
 scene.add(ambientLight);
 
   // --- Resize handler ---

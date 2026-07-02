@@ -23,7 +23,7 @@ export function objectInteraction(scene, camera, renderer) {
     composer.addPass(new OutputPass());
 
     const raycaster = new THREE.Raycaster();
-    raycaster.far = 100;
+    raycaster.far = 10;
     const center = new THREE.Vector2(0, 0);
     let currentSelected = null;
 
@@ -48,6 +48,7 @@ export function objectInteraction(scene, camera, renderer) {
             currentSelected = newSelected;
             outlinePass.selectedObjects = newSelected ? [newSelected] : [];
         }
+        return currentSelected;
     }
 
     return { composer, updateOutline };

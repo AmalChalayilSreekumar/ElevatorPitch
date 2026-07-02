@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
 
 
 // function openDoors(elevator, gltf){
@@ -70,7 +68,8 @@ export function createElevator(renderer, scene){
 
         });
 
-        elevator.position.set(0,1.7,0)
+        const xPos = 0, yPos = 1.7, zPos = 0;
+        elevator.position.set(xPos, yPos,zPos)
         scene.add(elevator);
     },
     (progress) => {
