@@ -48,7 +48,12 @@ export function objectInteraction(scene, camera, renderer) {
             currentSelected = newSelected;
             outlinePass.selectedObjects = newSelected ? [newSelected] : [];
         }
-        return currentSelected;
+        if (currentSelected){
+            return currentSelected.name;
+        }
+        else{
+            return null
+        }
     }
 
     return { composer, updateOutline };

@@ -24,7 +24,7 @@ export function initScene() {
   const nearCPlane = 0.1;                                       
   const farCPlane = 1000;   
   const camera = new THREE.PerspectiveCamera(fov, aspectRatio, nearCPlane, farCPlane);
-  const xPos = 0, yPos = 1.7, zPos = 2.5;
+  const xPos = 0, yPos = 1.7, zPos = 2.0;
 
   camera.position.set(xPos, yPos, zPos);
   camera.rotation.order = 'YXZ';           

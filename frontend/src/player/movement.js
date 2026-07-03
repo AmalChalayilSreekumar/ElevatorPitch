@@ -11,7 +11,6 @@ export function lookControlsPC(camera, renderer) {
     renderer.domElement.requestPointerLock();
   });
 
-  // Track yaw (left/right) and pitch (up/down) separately
   let yaw = 0; // left/right movement
   let pitch = 0; // up/down movement
 
@@ -31,7 +30,7 @@ export function lookControlsPC(camera, renderer) {
 
 export function movementPC(camera, scene) {
   const keys = {};
-  const { resolveCollisions } = createPlayerCollisions(scene);  // ← init collisions
+  const { resolveCollisions } = createPlayerCollisions(scene);  //  init collisions
 
   document.addEventListener('keydown', (e) => { keys[e.code] = true; });
   document.addEventListener('keyup',   (e) => { keys[e.code] = false; });
@@ -54,7 +53,6 @@ export function movementPC(camera, scene) {
     direction.applyEuler(camera.rotation);
     direction.y = 0;
 
-    // ↓ only change — resolve before applying
     const safe = resolveCollisions(camera, direction);
     camera.position.addScaledVector(safe, speed);  // ← was: direction
   }

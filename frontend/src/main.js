@@ -6,12 +6,15 @@ import { initScene } from './core/scene.js';
 import { lookControlsPC, movementPC } from './player/movement.js';
 import { createElevator } from './objects/elevator/Elevator.js';
 import { objectInteraction } from './player/objectInteractions.js';
+import { createProjectFloor } from './floors/floorManager.js';
 
 
 
 const { scene, camera, renderer } = initScene();
 
+const clock = new THREE.Clock();
 const elevator = createElevator(renderer, scene);
+const projectFloor = createProjectFloor(renderer, scene);
 
 
 // --- Floor ---
@@ -32,8 +35,9 @@ const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
 
 function animate() {
   requestAnimationFrame(animate);
+  elevator.update(clock.getDelta());
   updateMovement();
-  console.log(updateOutline());
+  const current = updateOutline();
   composer.render();
 }
 
