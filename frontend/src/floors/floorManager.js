@@ -11,13 +11,20 @@ export function createProjectFloor(renderer, scene){
 
     const textureLoader = new THREE.TextureLoader();
     const overlayTexture = textureLoader.load(
-        '/blenderFiles/ProjectsFloor/overlayImageTest.png',
+        '/blenderFiles/ProjectsFloor/image2.png',
         () => console.log('Texture loaded OK'),
         undefined,
         (err) => console.error('Texture failed to load:', err)
     );
 
-    const overlayTextureWalls = textureLoader.load(
+    const overlayTextureRoof = textureLoader.load(
+        '/blenderFiles/ProjectsFloor/wallReference.png',
+        () => console.log('Texture loaded OK'),
+        undefined,
+        (err) => console.error('Texture failed to load:', err)
+    );
+
+    const overlayTextureBackWall = textureLoader.load(
         '/blenderFiles/ProjectsFloor/image1.png',
         () => console.log('Texture loaded OK'),
         undefined,
@@ -25,14 +32,20 @@ export function createProjectFloor(renderer, scene){
     );
     overlayTexture.colorSpace = THREE.SRGBColorSpace;
 
-    const wallMaterial = new THREE.MeshBasicMaterial({
-        map: overlayTextureWalls,
+    const backWallMaterial = new THREE.MeshBasicMaterial({
+        map: overlayTextureBackWall,
         side: THREE.DoubleSide,
         transparent: true,
     });
 
     const groundMaterial = new THREE.MeshBasicMaterial({
         map: overlayTexture,
+        side: THREE.DoubleSide,
+        transparent: true,
+    });
+
+    const roofMaterial = new THREE.MeshBasicMaterial({
+        map: overlayTextureRoof,
         side: THREE.DoubleSide,
         transparent: true,
     });
@@ -44,40 +57,37 @@ export function createProjectFloor(renderer, scene){
         (gltf) => {
             projectFloor = gltf.scene;
 
-            if (gltf.animations.length > 0) {
-                console.log("animation exists");
-                const mixer = new THREE.AnimationMixer(projectFloor);
-                const action = mixer.clipAction(gltf.animations[0]);
-                action.play();
-            }
-
             projectFloor.traverse((child) => {
                 if (child.isMesh) console.log('mesh found:', child.name);
             });
 
-            const xPos = 0, yPos = 0.3, zPos = -10;
+            const xPos = 0, yPos = .4, zPos = -9.2;
             projectFloor.position.set(xPos, yPos, zPos);
             scene.add(projectFloor);
 
-            const wallGeometry = new THREE.PlaneGeometry(20, 3);
-            const floorGeometry = new THREE.PlaneGeometry(3.6, 20)
-            const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
-            const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
+            const wallGeometry = new THREE.PlaneGeometry(20, 3.1);
+            const floorGeometry = new THREE.PlaneGeometry(3.1, 20);
+            const backWallGeometry = new THREE.PlaneGeometry(3,3.2)
+            const rightWall = new THREE.Mesh(wallGeometry, roofMaterial);
+            const leftWall = new THREE.Mesh(wallGeometry, roofMaterial);
             const floor = new THREE.Mesh(floorGeometry, groundMaterial);
-            const roof = new THREE.Mesh(floorGeometry, wallMaterial);
-            leftWall.position.set(-1.4,1.7,-10);
+            const roof = new THREE.Mesh(floorGeometry, backWallMaterial);
+            const backWall = new THREE.Mesh(backWallGeometry, backWallMaterial)
+            leftWall.position.set(-1.5,1.7,-10);
             leftWall.rotation.y= THREE.MathUtils.degToRad(90);
-            rightWall.position.set(1.4, 1.7, -10);
+            rightWall.position.set(1.5, 1.7, -10);
             rightWall.rotation.y = THREE.MathUtils.degToRad(90);
             floor.position.set(0,0.1,-10);
             floor.rotation.x = THREE.MathUtils.degToRad(90);
             roof.position.set(0,3.2,-10);
             roof.rotation.x = THREE.MathUtils.degToRad(90);
+            backWall.position.set(0,1.7,-20)
             
             scene.add(floor)
             scene.add(rightWall);
             scene.add(leftWall);
             scene.add(roof)
+            scene.add(backWall)
         },
         (progress) => {
             console.log('Loading:', Math.round((progress.loaded / progress.total) * 100) + '%');
