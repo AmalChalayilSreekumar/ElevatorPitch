@@ -35,13 +35,16 @@ export function createSign({ title, subtitle, color }, { span = 2.8, height = 3.
     sign.add(post);
   }
 
+  // Two single-sided faces so the text reads correctly from both sides.
   const width = span + 0.4;
-  const board = new THREE.Mesh(
-    new THREE.PlaneGeometry(width, width / 4),
-    new THREE.MeshBasicMaterial({ map: signTexture(title, subtitle, color), side: THREE.DoubleSide })
-  );
-  board.position.set(0, height, 0.1);
-  sign.add(board);
+  const boardGeometry = new THREE.PlaneGeometry(width, width / 4);
+  const boardMaterial = new THREE.MeshBasicMaterial({ map: signTexture(title, subtitle, color) });
+  for (const facing of [1, -1]) {
+    const board = new THREE.Mesh(boardGeometry, boardMaterial);
+    board.position.set(0, height, 0.1 * facing);
+    if (facing < 0) board.rotation.y = Math.PI;
+    sign.add(board);
+  }
 
   return sign;
 }

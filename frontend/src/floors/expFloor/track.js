@@ -67,8 +67,8 @@ export function createTrack() {
     }
   }
 
-  const railMaterial = new THREE.MeshLambertMaterial({ color: 0xd62828 });
-  const steelMaterial = new THREE.MeshLambertMaterial({ color: 0xe9ecef });
+  const railMaterial = new THREE.MeshBasicMaterial({ color: 0xff2e88 });
+  const steelMaterial = new THREE.MeshLambertMaterial({ color: 0x4a5064 });
   const tube = (points, radius, material) =>
     new THREE.Mesh(
       new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points, true), SEGMENTS, radius, 6, true),

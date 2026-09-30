@@ -4,6 +4,7 @@ import { createTrack } from './track.js';
 import { createCart, RIDER_EYE } from './cart.js';
 import { createSign } from './sign.js';
 import { createTimelineCard } from './timelineCard.js';
+import { createHall } from './hall.js';
 
 const GRAVITY = 9.8;
 const CHAIN_SPEED = 3;
@@ -11,15 +12,16 @@ const MAX_ACCEL = 8;
 const BRAKE_DECEL = 8;
 const CREEP_SPEED = 0.3;
 const EXIT_POSITION = new THREE.Vector3(0, 1.7, -2.5);
+const HALL_COLOR = 0x05060f;
 
 function createStation() {
   const station = new THREE.Group();
 
   const platform = new THREE.Mesh(
-    new THREE.BoxGeometry(8, 0.1, 3),
-    new THREE.MeshLambertMaterial({ color: 0xb8b8b8 })
+    new THREE.BoxGeometry(8, 0.1, 3.9),
+    new THREE.MeshLambertMaterial({ color: 0x3a3d4d })
   );
-  platform.position.set(0, 0, -2.9);
+  platform.position.set(0, 0, -2.45);
 
   const safetyEdge = new THREE.Mesh(
     new THREE.BoxGeometry(8, 0.02, 0.2),
@@ -35,22 +37,6 @@ function createStation() {
 
   station.add(platform, safetyEdge, sign);
   return station;
-}
-
-function createEnvironment() {
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(400, 400),
-    new THREE.MeshLambertMaterial({ color: 0x7fb069 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.05;
-
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-  sun.position.set(20, 40, 10);
-
-  const environment = new THREE.Group();
-  environment.add(ground, sun, new THREE.HemisphereLight(0xcfe8ff, 0x4f6d3a, 0.6));
-  return environment;
 }
 
 export function createExpFloor(camera, look) {
@@ -73,7 +59,23 @@ export function createExpFloor(camera, look) {
   });
 
   track.placeAt(0, cart);
-  group.add(track.group, cart, createStation(), createEnvironment());
+  group.add(track.group, cart, createStation(), createHall());
+
+  // Dark fog so the hall fades into blackness; the previous look is restored on exit.
+  const hallFog = new THREE.Fog(HALL_COLOR, 20, 75);
+  const hallBackground = new THREE.Color(HALL_COLOR);
+  let outside = null;
+
+  function enter(scene) {
+    outside = { fog: scene.fog, background: scene.background };
+    scene.fog = hallFog;
+    scene.background = hallBackground;
+  }
+
+  function exit(scene) {
+    scene.fog = outside.fog;
+    scene.background = outside.background;
+  }
 
   let riding = false;
   let held = false;
@@ -139,6 +141,8 @@ export function createExpFloor(camera, look) {
   return {
     group,
     ready: Promise.resolve(),
+    enter,
+    exit,
     update,
     interactions: { coasterCart: board },
     controlsLocked: () => riding,

@@ -19,7 +19,7 @@ const MIN_TRAVEL_MS = 1500;
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Every floor returns { group, ready, update?, interactions?, controlsLocked? }.
+// Every floor returns { group, ready, enter?, exit?, update?, interactions?, controlsLocked? }.
 export function createFloorManager(scene, camera, look, elevator) {
     const factories = {
         projects: () => createProjectFloor(),
@@ -46,10 +46,14 @@ export function createFloorManager(scene, camera, look, elevator) {
             elevator.setDisplay(`${FLOORS[name].level > FLOORS[currentName].level ? '▲' : '▼'} ${label(name)}`);
             await Promise.all([load(name).ready, wait(MIN_TRAVEL_MS)]);
 
-            if (current) scene.remove(current.group);
+            if (current) {
+                scene.remove(current.group);
+                current.exit?.(scene);
+            }
             current = floors[name];
             currentName = name;
             scene.add(current.group);
+            current.enter?.(scene);
         } catch (error) {
             console.error(`Floor "${name}" failed to load:`, error);
         } finally {
