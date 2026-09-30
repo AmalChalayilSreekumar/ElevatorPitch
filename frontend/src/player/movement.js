@@ -26,6 +26,14 @@ export function lookControlsPC(camera, renderer) {
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
   });
+
+  return {
+    reset(newYaw = 0, newPitch = 0) {
+      yaw = newYaw;
+      pitch = newPitch;
+      camera.rotation.set(pitch, yaw, 0);
+    },
+  };
 }
 
 export function movementPC(camera, scene) {

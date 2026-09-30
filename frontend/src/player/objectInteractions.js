@@ -7,6 +7,13 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const interactionalObjects = ["buttonInner","buttonInner1","buttonInner2","buttonInner3"]
 
+function findInteractive(object) {
+    for (let o = object; o; o = o.parent) {
+        if (interactionalObjects.includes(o.name) || o.userData.interactive) return o;
+    }
+    return null;
+}
+
 export function objectInteraction(scene, camera, renderer) {
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -35,15 +42,11 @@ export function objectInteraction(scene, camera, renderer) {
         raycaster.setFromCamera(center, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
 
-        let hit = null;
-        for (let i = 0; i < intersects.length; i++) {
-            if (interactionalObjects.includes(intersects[i].object.name)) {
-                hit = intersects[i];
-                break;
-            }
+        let newSelected = null;
+        for (let i = 0; i < intersects.length && !newSelected; i++) {
+            newSelected = findInteractive(intersects[i].object);
         }
 
-        const newSelected = hit ? hit.object : null;
         if (newSelected !== currentSelected) {
             currentSelected = newSelected;
             outlinePass.selectedObjects = newSelected ? [newSelected] : [];

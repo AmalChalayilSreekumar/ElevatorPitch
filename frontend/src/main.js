@@ -6,7 +6,7 @@ import { initScene } from './core/scene.js';
 import { lookControlsPC, movementPC } from './player/movement.js';
 import { createElevator } from './objects/elevator/Elevator.js';
 import { objectInteraction } from './player/objectInteractions.js';
-import { createProjectFloor } from './floors/floorManager.js';
+import { createFloorManager } from './floors/floorManager.js';
 
 
 
@@ -14,7 +14,6 @@ const { scene, camera, renderer } = initScene();
 
 const clock = new THREE.Clock();
 const elevator = createElevator(renderer, scene);
-const projectFloor = createProjectFloor(renderer, scene);
 
 
 // --- Floor ---
@@ -26,18 +25,28 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-lookControlsPC(camera, renderer);
+const look = lookControlsPC(camera, renderer);
 const updateMovement = movementPC(camera, scene);
 
+const floors = createFloorManager(scene, camera, look);
+floors.select('projects');
+
 const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
+let hovered = null;
+
+renderer.domElement.addEventListener('click', () => {
+  if (hovered && document.pointerLockElement === renderer.domElement) floors.interact(hovered);
+});
 
 
 
 function animate() {
   requestAnimationFrame(animate);
-  elevator.update(clock.getDelta());
-  updateMovement();
-  const current = updateOutline();
+  const delta = clock.getDelta();
+  elevator.update(delta);
+  floors.update(delta);
+  if (!floors.controlsLocked()) updateMovement();
+  hovered = updateOutline();
   composer.render();
 }
 
