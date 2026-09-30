@@ -7,10 +7,18 @@ import { lookControlsPC, movementPC } from './player/movement.js';
 import { createElevator } from './objects/elevator/Elevator.js';
 import { objectInteraction } from './player/objectInteractions.js';
 import { createFloorManager } from './floors/floorManager.js';
+import { createIntroScreen } from './ui/introScreen.js';
+import { profile } from './data/profile.js';
 
 
 
 const { scene, camera, renderer } = initScene();
+
+let playing = false;
+createIntroScreen(profile, () => {
+  playing = true;
+  Promise.resolve(renderer.domElement.requestPointerLock()).catch(() => {});
+});
 
 const clock = new THREE.Clock();
 const elevator = createElevator(renderer, scene);
@@ -28,8 +36,8 @@ scene.add(floor);
 const look = lookControlsPC(camera, renderer);
 const updateMovement = movementPC(camera, scene);
 
-const floors = createFloorManager(scene, camera, look);
-floors.select('projects');
+const floors = createFloorManager(scene, camera, look, elevator);
+floors.preload('projects');
 
 const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
 let hovered = null;
@@ -45,7 +53,7 @@ function animate() {
   const delta = clock.getDelta();
   elevator.update(delta);
   floors.update(delta);
-  if (!floors.controlsLocked()) updateMovement();
+  if (playing && !floors.controlsLocked()) updateMovement();
   hovered = updateOutline();
   composer.render();
 }

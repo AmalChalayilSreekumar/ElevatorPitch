@@ -1,6 +1,38 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { projects } from '../../data/projects.js';
+import { createPainting, prepareFrameTemplate } from './painting.js';
+
+const HALL_HALF_WIDTH = 1.5;
+const FIRST_PAINTING_Z = -3;
+const PAINTING_SPACING = 2.6;
+const PAINTING_HEIGHT = 1.7;
+
+// Alternates walls, staggering the right wall so paintings never face each other directly.
+function hangPaintings(group, frameTemplate) {
+    const interactions = {};
+
+    projects.forEach((project, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const painting = createPainting(project, frameTemplate);
+        painting.position.set(
+            side * (HALL_HALF_WIDTH - 0.01),
+            PAINTING_HEIGHT,
+            FIRST_PAINTING_Z - Math.floor(i / 2) * PAINTING_SPACING - (side > 0 ? PAINTING_SPACING / 2 : 0)
+        );
+        painting.rotation.y = -side * Math.PI / 2;
+
+        if (project.link) {
+            painting.name = `project-${i}`;
+            painting.userData.interactive = true;
+            interactions[painting.name] = () => window.open(project.link, '_blank', 'noopener');
+        }
+        group.add(painting);
+    });
+
+    return interactions;
+}
 
 export function createProjectFloor() {
     const dracoLoader = new DRACOLoader();
@@ -51,14 +83,13 @@ export function createProjectFloor() {
     });
 
     const group = new THREE.Group();
+    const interactions = {};
 
     const ready = new Promise((resolve, reject) => loader.load(
         "./../../../blenderFiles/ProjectsFloor/ProjectsFloor.glb",
         (gltf) => {
-            const projectFloor = gltf.scene;
-
-            const xPos = 0, yPos = .4, zPos = -9.2;
-            projectFloor.position.set(xPos, yPos, zPos);
+            const frameTemplate = prepareFrameTemplate(gltf.scene.getObjectByName('Picture_Frame'));
+            Object.assign(interactions, hangPaintings(group, frameTemplate));
 
             const wallGeometry = new THREE.PlaneGeometry(20, 3.1);
             const floorGeometry = new THREE.PlaneGeometry(3.1, 20);
@@ -78,12 +109,12 @@ export function createProjectFloor() {
             roof.rotation.x = THREE.MathUtils.degToRad(90);
             backWall.position.set(0,1.7,-20)
 
-            group.add(projectFloor, floor, rightWall, leftWall, roof, backWall);
+            group.add(floor, rightWall, leftWall, roof, backWall);
             resolve();
         },
         undefined,
         reject
     ));
 
-    return { group, ready };
+    return { group, ready, interactions };
 }

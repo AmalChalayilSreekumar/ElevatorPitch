@@ -1,6 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { createFloorDisplay } from './floorDisplay.js';
+
+// Display mesh -> world direction its screen faces (into the car / out to the floor).
+const DISPLAYS = {
+    floorDisplayInside001: new THREE.Vector3(0, 0, 1),
+    floorDisplayOutside001: new THREE.Vector3(0, 0, -1),
+};
 
 
 export function createElevator(renderer, scene){
@@ -11,20 +18,23 @@ export function createElevator(renderer, scene){
     loader.setDRACOLoader(dracoLoader);
 
     let mixer = null;
+    let doorActions = [];
+    let displays = [];
+    let displayText = '';
 
     loader.load("./../../../blenderFiles/Elevator/ElevatorMain.glb", (gltf) => {
         const elevator = gltf.scene;
 
-        if (gltf.animations.length > 0) {
-            console.log("animations found:", gltf.animations.map(a => a.name));
-            mixer = new THREE.AnimationMixer(elevator);
-            gltf.animations.forEach((clip) => {
-                const action = mixer.clipAction(clip);
-                action.setLoop(THREE.LoopOnce);
-                action.clampWhenFinished = true;
-                action.play();
-            });
-        }
+        // Door clips run forward to open and in reverse to close; they start paused on the closed pose.
+        mixer = new THREE.AnimationMixer(elevator);
+        doorActions = gltf.animations.map((clip) => {
+            const action = mixer.clipAction(clip);
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+            action.play();
+            action.paused = true;
+            return action;
+        });
 
         elevator.traverse((child) => {
             if (child.isMesh) {
@@ -53,6 +63,11 @@ export function createElevator(renderer, scene){
 
         elevator.position.set(0, 1.7, 0);
         scene.add(elevator);
+
+        displays = Object.entries(DISPLAYS).map(([name, facing]) =>
+            createFloorDisplay(elevator.getObjectByName(name), facing)
+        );
+        displays.forEach((show) => show(displayText));
     },
     (progress) => {
         console.log('Loading:', Math.round((progress.loaded / progress.total) * 100) + '%');
@@ -62,7 +77,36 @@ export function createElevator(renderer, scene){
     }
     );
 
+    let doorsOpen = false;
+
+    function setDoors(open) {
+        if (open === doorsOpen || doorActions.length === 0) return Promise.resolve();
+        doorsOpen = open;
+
+        return new Promise((resolve) => {
+            let remaining = doorActions.length;
+            const onFinished = (e) => {
+                if (!doorActions.includes(e.action) || --remaining > 0) return;
+                mixer.removeEventListener('finished', onFinished);
+                resolve();
+            };
+            mixer.addEventListener('finished', onFinished);
+
+            for (const action of doorActions) {
+                action.timeScale = open ? 1 : -1;
+                action.paused = false;
+                action.play();
+            }
+        });
+    }
+
     return {
+        openDoors: () => setDoors(true),
+        closeDoors: () => setDoors(false),
+        setDisplay(text) {
+            displayText = text;
+            displays.forEach((show) => show(text));
+        },
         update(delta) {
             if (mixer) mixer.update(delta);
         }
