@@ -4,22 +4,28 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { projects } from '../../data/projects.js';
 import { createPainting, prepareFrameTemplate } from './painting.js';
 
-const HALL_HALF_WIDTH = 1.5;
-const FIRST_PAINTING_Z = -3;
-const PAINTING_SPACING = 2.6;
-const PAINTING_HEIGHT = 1.7;
+// Gallery layout in world metres, the only numbers to change when lining frames up with the wall panels.
+// Left-wall values; the right wall mirrors them automatically.
+const GALLERY = {
+    firstPairZ: -2.7,   // how far down the hall the first pair hangs (more negative = further from the elevator)
+    height: 2.1,        // centre of each frame above the floor
+    pairSpacing: 4.2,   // distance between one pair and the next
+    wallX: 1.49,        // centre of hall to back of frame (walls are at ±1.5)
+};
 
-// Alternates walls, staggering the right wall so paintings never face each other directly.
+// Projects fill the hall in facing pairs: even indices on the left wall, odd directly opposite.
 function hangPaintings(group, frameTemplate) {
     const interactions = {};
 
     projects.forEach((project, i) => {
         const side = i % 2 === 0 ? -1 : 1;
-        const painting = createPainting(project, frameTemplate);
+        // Labels sit on the far side of every painting, so the right wall is a true mirror of the left.
+        const painting = createPainting(project, frameTemplate, { labelSide: -side });
+        const pair = Math.floor(i / 2);
         painting.position.set(
-            side * (HALL_HALF_WIDTH - 0.01),
-            PAINTING_HEIGHT,
-            FIRST_PAINTING_Z - Math.floor(i / 2) * PAINTING_SPACING - (side > 0 ? PAINTING_SPACING / 2 : 0)
+            side * GALLERY.wallX,
+            GALLERY.height,
+            GALLERY.firstPairZ - pair * GALLERY.pairSpacing
         );
         painting.rotation.y = -side * Math.PI / 2;
 

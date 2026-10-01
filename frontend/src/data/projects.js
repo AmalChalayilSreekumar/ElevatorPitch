@@ -1,4 +1,5 @@
-// Gallery order: alternates left wall, right wall, walking away from the elevator.
+// Gallery order: facing pairs walking away from the elevator (1st left, 2nd opposite on the right, 3rd left, ...).
+// Keep an even count so every pair is complete.
 // Media paths are relative to Public/ (e.g. '/projects/site.mp4'). Leave both null for a placeholder.
 export const projects = [
   {
@@ -19,6 +20,14 @@ export const projects = [
   },
   {
     title: 'Project Three',
+    description: 'One or two sentences on what it does and what you built.',
+    tech: ['Tech', 'Stack'],
+    image: null,
+    video: null,
+    link: null,
+  },
+  {
+    title: 'Project Four',
     description: 'One or two sentences on what it does and what you built.',
     tech: ['Tech', 'Stack'],
     image: null,

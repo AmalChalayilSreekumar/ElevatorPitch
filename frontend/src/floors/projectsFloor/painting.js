@@ -109,6 +109,7 @@ function plaqueTexture({ title, tech, description, link }) {
 }
 
 // Prepares the loaded Blender frame to be cloned per project.
+// Position only aligns the model with its canvas; hallway placement lives in GALLERY in projectFloor.js.
 export function prepareFrameTemplate(frame) {
   frame.position.set(0, 0, 0);
   frame.quaternion.copy(FRAME_ROTATION);
@@ -120,15 +121,15 @@ export function prepareFrameTemplate(frame) {
   return frame;
 }
 
-// A framed project with its wall label, facing local +Z.
-export function createPainting(project, frameTemplate) {
+// A framed project with its wall label, facing local +Z. labelSide: 1 puts the label on the local +X side, -1 on -X.
+export function createPainting(project, frameTemplate, { labelSide = 1 } = {}) {
   const painting = new THREE.Group();
 
   const canvas = new THREE.Mesh(canvasGeometry, new THREE.MeshBasicMaterial({ map: mediaTexture(project) }));
   canvas.position.z = 0.008;
 
   const plaque = new THREE.Mesh(plaqueGeometry, new THREE.MeshBasicMaterial({ map: plaqueTexture(project) }));
-  plaque.position.set(0.94, -0.12, 0.005);
+  plaque.position.set(labelSide * 0.94, -0.12, 0.005);
 
   painting.add(frameTemplate.clone(), canvas, plaque);
   return painting;

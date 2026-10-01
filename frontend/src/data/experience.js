@@ -1,11 +1,11 @@
 // Chronological order: the coaster stops at each entry in sequence.
 export const experience = [
   {
-    company: 'Company One',
+    company: 'Evertz Microsystems',
     role: 'Software Development Intern',
     period: 'Aug 2025 - Sept 2025',
     location: 'Burlington, Ontario',
-    summary: 'One or two sentences on the team and what you owned.',
+    summary: 'Created scripts and developed a production level full-stack application',
     highlights: [
       'Impact-focused bullet with a number in it',
       'Another thing you shipped',
