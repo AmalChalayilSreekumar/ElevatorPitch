@@ -30,7 +30,7 @@ function createStation() {
   safetyEdge.position.set(0, 0.06, -4.3);
 
   const sign = createSign(
-    { title: 'Career Coaster', subtitle: 'Click the cart to ride', color: '#1d3557' },
+    { title: 'Career Coaster', subtitle: 'Click On Cart', color: '#1d3557' },
     { span: 3.2, height: 2.8 }
   );
   sign.position.z = -3.9;
