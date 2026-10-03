@@ -1,16 +1,19 @@
 import { createProjectFloor } from './projectsFloor/projectFloor.js';
 import { createExpFloor } from './expFloor/expFloor.js';
+import { createStackFloor } from './stackFloor/stackFloor.js';
 
 // Elevator button mesh name -> floor key. Panel top to bottom: buttonInner (Me), 1 (Experience), 3 (Stack), 2 (Projects).
 const FLOOR_BUTTONS = {
     buttonInner1: 'experience',
     buttonInner2: 'projects',
+    buttonInner3: 'stack',
 };
 
 // Shown on the elevator displays; level sets the travel arrow direction.
 const FLOORS = {
     lobby: { level: 0, label: 'Lobby' },
     projects: { level: 1, label: 'Projects' },
+    stack: { level: 2, label: 'Stack' },
     experience: { level: 3, label: 'Experience' },
 };
 
@@ -24,6 +27,7 @@ export function createFloorManager(scene, camera, look, elevator) {
     const factories = {
         projects: () => createProjectFloor(),
         experience: () => createExpFloor(camera, look),
+        stack: () => createStackFloor(camera, look),
     };
     const floors = {};
     let current = null;
