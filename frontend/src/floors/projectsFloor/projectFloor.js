@@ -3,31 +3,48 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { projects } from '../../data/projects.js';
 import { createPainting, prepareFrameTemplate } from './painting.js';
+import { createDoorwayWall } from '../doorwayWall.js';
+import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
 
-// Gallery layout in world metres, the only numbers to change when lining frames up with the wall panels.
-// Left-wall values; the right wall mirrors them automatically.
-const GALLERY = {
-    firstPairZ: -2.7,   // how far down the hall the first pair hangs (more negative = further from the elevator)
-    height: 2.1,        // centre of each frame above the floor
-    pairSpacing: 4.2,   // distance between one pair and the next
-    wallX: 1.49,        // centre of hall to back of frame (walls are at ±1.5)
+// Short hall in world metres: the front wall sits flush with the elevator, paintings hang on the other three walls.
+const ROOM = {
+    halfWidth: 3.6,
+    floorY: 0.1,
+    height: 4,
+    frontZ: ELEVATOR_FRONT.z,
+    backZ: -6.5,
 };
 
-// Projects fill the hall in facing pairs: even indices on the left wall, odd directly opposite.
+const HANG_GAP = 0.01;
+
+// Where each wall's paintings hang, facing into the room. `along` runs across the wall: x on the back wall, z on the sides.
+const WALLS = {
+    back: { rotationY: 0, position: (along, y) => [along, y, ROOM.backZ + HANG_GAP] },
+    left: { rotationY: Math.PI / 2, position: (along, y) => [-ROOM.halfWidth + HANG_GAP, y, along] },
+    right: { rotationY: -Math.PI / 2, position: (along, y) => [ROOM.halfWidth - HANG_GAP, y, along] },
+};
+
+const SIDE_CENTER_Z = (ROOM.frontZ + ROOM.backZ) / 2;
+
+// Projects fill these in order: back-wall centrepiece, then left wall, then right wall.
+// y is the frame centre above the floor; scale enlarges the frame together with its title and side panels.
+const WALL_SLOTS = [
+    { wall: 'back', along: 0, y: 1.75, scale: 1.8 },
+    { wall: 'left', along: SIDE_CENTER_Z, y: 1.75, scale: 1.8 },
+    { wall: 'right', along: SIDE_CENTER_Z, y: 1.75, scale: 1.8 },
+];
+
 function hangPaintings(group, frameTemplate) {
     const interactions = {};
+    if (projects.length > WALL_SLOTS.length) {
+        console.warn(`Projects floor has ${WALL_SLOTS.length} wall spots; ${projects.length - WALL_SLOTS.length} project(s) not hung.`);
+    }
 
-    projects.forEach((project, i) => {
-        const side = i % 2 === 0 ? -1 : 1;
-        // Labels sit on the far side of every painting, so the right wall is a true mirror of the left.
-        const painting = createPainting(project, frameTemplate, { labelSide: -side });
-        const pair = Math.floor(i / 2);
-        painting.position.set(
-            side * GALLERY.wallX,
-            GALLERY.height,
-            GALLERY.firstPairZ - pair * GALLERY.pairSpacing
-        );
-        painting.rotation.y = -side * Math.PI / 2;
+    projects.slice(0, WALL_SLOTS.length).forEach((project, i) => {
+        const { wall, along, y, scale } = WALL_SLOTS[i];
+        const painting = createPainting(project, frameTemplate, { scale });
+        painting.position.set(...WALLS[wall].position(along, y));
+        painting.rotation.y = WALLS[wall].rotationY;
 
         if (project.link) {
             painting.name = `project-${i}`;
@@ -38,6 +55,38 @@ function hangPaintings(group, frameTemplate) {
     });
 
     return interactions;
+}
+
+function createRoom(materials) {
+    const { halfWidth, floorY, height, frontZ, backZ } = ROOM;
+    const width = halfWidth * 2;
+    const depth = frontZ - backZ;
+    const centerZ = (frontZ + backZ) / 2;
+    const wallHeight = height - floorY;
+    const wallY = floorY + wallHeight / 2;
+
+    const sideGeometry = new THREE.PlaneGeometry(depth, wallHeight);
+    const leftWall = new THREE.Mesh(sideGeometry, materials.backWall);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-halfWidth, wallY, centerZ);
+    const rightWall = new THREE.Mesh(sideGeometry, materials.backWall);
+    rightWall.rotation.y = Math.PI / 2;
+    rightWall.position.set(halfWidth, wallY, centerZ);
+
+    const flatGeometry = new THREE.PlaneGeometry(width, depth);
+    const floor = new THREE.Mesh(flatGeometry, materials.ground);
+    floor.rotation.x = Math.PI / 2;
+    floor.position.set(0, floorY, centerZ);
+    const roof = new THREE.Mesh(flatGeometry, materials.backWall);
+    roof.rotation.x = Math.PI / 2;
+    roof.position.set(0, height, centerZ);
+
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, wallHeight), materials.backWall);
+    backWall.position.set(0, wallY, backZ);
+
+    const frontWall = createDoorwayWall({ minX: -halfWidth, maxX: halfWidth, height, z: frontZ }, materials.wall);
+
+    return [leftWall, rightWall, floor, roof, backWall, frontWall];
 }
 
 export function createProjectFloor() {
@@ -97,25 +146,7 @@ export function createProjectFloor() {
             const frameTemplate = prepareFrameTemplate(gltf.scene.getObjectByName('Picture_Frame'));
             Object.assign(interactions, hangPaintings(group, frameTemplate));
 
-            const wallGeometry = new THREE.PlaneGeometry(20, 3.1);
-            const floorGeometry = new THREE.PlaneGeometry(3.1, 20);
-            const backWallGeometry = new THREE.PlaneGeometry(3,3.2)
-            const rightWall = new THREE.Mesh(wallGeometry, roofMaterial);
-            const leftWall = new THREE.Mesh(wallGeometry, roofMaterial);
-            const floor = new THREE.Mesh(floorGeometry, groundMaterial);
-            const roof = new THREE.Mesh(floorGeometry, backWallMaterial);
-            const backWall = new THREE.Mesh(backWallGeometry, backWallMaterial)
-            leftWall.position.set(-1.5,1.7,-10);
-            leftWall.rotation.y= THREE.MathUtils.degToRad(90);
-            rightWall.position.set(1.5, 1.7, -10);
-            rightWall.rotation.y = THREE.MathUtils.degToRad(90);
-            floor.position.set(0,0.1,-10);
-            floor.rotation.x = THREE.MathUtils.degToRad(90);
-            roof.position.set(0,3.2,-10);
-            roof.rotation.x = THREE.MathUtils.degToRad(90);
-            backWall.position.set(0,1.7,-20)
-
-            group.add(floor, rightWall, leftWall, roof, backWall);
+            group.add(...createRoom({ wall: roofMaterial, ground: groundMaterial, backWall: backWallMaterial }));
             resolve();
         },
         undefined,

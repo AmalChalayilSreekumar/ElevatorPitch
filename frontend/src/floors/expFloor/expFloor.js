@@ -7,7 +7,8 @@ import { createTimelineCard } from './timelineCard.js';
 import { createHall } from './hall.js';
 
 const GRAVITY = 9.8;
-const CHAIN_SPEED = 3;
+// Lift speed up to the first peak, and the speed the cart crests at.
+const CHAIN_SPEED = 5;
 const MAX_ACCEL = 8;
 const BRAKE_DECEL = 8;
 const CREEP_SPEED = 0.3;

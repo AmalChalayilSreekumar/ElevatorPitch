@@ -1,10 +1,13 @@
 import * as THREE from 'three';
+import { createDoorwayWall } from '../doorwayWall.js';
+import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
+import { canvasTexture } from '../../utils/canvas.js';
 
 // The front wall sits flush with the elevator; the counter splits the shooter booth from the range.
 export const RANGE = {
   minX: -7,
   maxX: 7,
-  frontZ: -0.5,
+  frontZ: ELEVATOR_FRONT.z,
   backZ: -15,
   height: 4.5,
   counterZ: -4.5,
@@ -12,21 +15,10 @@ export const RANGE = {
 };
 
 const COUNTER_DEPTH = 0.6;
-const DOORWAY = { halfWidth: 1.55, height: 3.3 };
 const BAFFLE_SPACING = 3;
 const DISTANCE_LINES = [-7, -10, -13];
 
 const noRaycast = () => {};
-
-function canvasTexture(width, height, draw) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  draw(canvas.getContext('2d'));
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
 
 function hazardTexture(repeat) {
   const texture = canvasTexture(64, 64, (ctx) => {
@@ -45,23 +37,6 @@ function hazardTexture(repeat) {
   texture.wrapS = THREE.RepeatWrapping;
   texture.repeat.set(repeat, 1);
   return texture;
-}
-
-function bannerTexture() {
-  return canvasTexture(1024, 256, (ctx) => {
-    ctx.fillStyle = '#1c1c1c';
-    ctx.fillRect(0, 0, 1024, 256);
-    ctx.strokeStyle = '#ff6b2c';
-    ctx.lineWidth = 10;
-    ctx.strokeRect(10, 10, 1004, 236);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 104px system-ui, sans-serif';
-    ctx.fillText('STACK RANGE', 512, 130, 960);
-    ctx.fillStyle = '#ffd166';
-    ctx.font = '44px system-ui, sans-serif';
-    ctx.fillText('Pick up the blaster on the counter', 512, 205, 960);
-  });
 }
 
 function createShell() {
@@ -108,15 +83,7 @@ function createShell() {
   berm.rotation.x = -Math.PI / 4;
   berm.position.set(0, 0.85, backZ + 0.85);
 
-  // Faces -Z after the half turn, so shape x is mirrored world x.
-  const frontShape = new THREE.Shape()
-    .moveTo(-maxX, 0).lineTo(-minX, 0).lineTo(-minX, height).lineTo(-maxX, height).closePath();
-  frontShape.holes.push(new THREE.Path()
-    .moveTo(-DOORWAY.halfWidth, 0).lineTo(-DOORWAY.halfWidth, DOORWAY.height)
-    .lineTo(DOORWAY.halfWidth, DOORWAY.height).lineTo(DOORWAY.halfWidth, 0).closePath());
-  const frontWall = new THREE.Mesh(new THREE.ShapeGeometry(frontShape), wallMaterial);
-  frontWall.rotation.y = Math.PI;
-  frontWall.position.z = frontZ;
+  const frontWall = createDoorwayWall({ minX, maxX, height, z: frontZ }, wallMaterial);
 
   return [floor, ceiling, leftWall, rightWall, backWall, berm, frontWall];
 }
@@ -145,13 +112,7 @@ function createBooth() {
   );
   barrier.position.set(0, counterHeight + (height - counterHeight) / 2, frontFaceZ);
 
-  const banner = new THREE.Mesh(
-    new THREE.PlaneGeometry(4, 1),
-    new THREE.MeshBasicMaterial({ map: bannerTexture() })
-  );
-  banner.position.set(0, 3.5, counterZ - 0.4);
-
-  return [counter, hazard, barrier, banner];
+  return [counter, hazard, barrier];
 }
 
 function createDistanceLines() {

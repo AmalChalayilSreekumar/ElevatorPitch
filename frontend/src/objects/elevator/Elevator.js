@@ -9,6 +9,13 @@ const DISPLAYS = {
     floorDisplayOutside001: new THREE.Vector3(0, 0, -1),
 };
 
+// The car's outer front face (mButtonSquare.001 in ElevatorMain.glb), measured in world metres once placed.
+// Every floor's front wall stands at z with a doorway cut to this face (floors/doorwayWall.js).
+export const ELEVATOR_FRONT = { z: -0.5, halfWidth: 1.38, bottom: 0.25, top: 3.15 };
+const MODEL_FACE_Z = -0.343;
+// The face sits just behind the floor's front wall so the two never z-fight.
+const FACE_INSET = 0.01;
+
 
 export function createElevator(renderer, scene){
     const dracoLoader = new DRACOLoader();
@@ -61,7 +68,7 @@ export function createElevator(renderer, scene){
             child.receiveShadow = true;
         });
 
-        elevator.position.set(0, 1.7, 0);
+        elevator.position.set(0, 1.7, ELEVATOR_FRONT.z + FACE_INSET - MODEL_FACE_Z);
         scene.add(elevator);
 
         displays = Object.entries(DISPLAYS).map(([name, facing]) =>

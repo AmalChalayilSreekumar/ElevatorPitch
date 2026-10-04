@@ -4,6 +4,7 @@ import { createRange, RANGE } from './range.js';
 import { createTarget } from './target.js';
 import { createGun, createMuzzleFlash } from './gun.js';
 import { createRangeHud } from './rangeHud.js';
+import { createStackBoards } from './boards.js';
 
 // Targets float at these spots downrange; each pop-up picks a free one, never the spot just used.
 // Needs at least ACTIVE_TARGETS + 1 entries.
@@ -53,7 +54,7 @@ export function createStackFloor(camera, look) {
   viewmodel.visible = false;
   viewmodel.traverse((child) => { child.raycast = noRaycast; });
 
-  group.add(createRange(), counterGun, viewmodel);
+  group.add(createRange(), createStackBoards(), counterGun, viewmodel);
 
   const hud = createRangeHud(stack.length);
   const raycaster = new THREE.Raycaster();

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { canvasTexture, drawContained } from '../../utils/canvas.js';
 
 // Inner canvas of the Blender frame, in metres.
 const CANVAS_WIDTH = 0.93;
@@ -14,8 +15,18 @@ const FRAME_ROTATION = new THREE.Quaternion().setFromRotationMatrix(
   )
 );
 
+// Panel sizes in metres at scale 1; the whole painting is scaled together.
+const PANEL_GAP = 0.06;
+const TITLE_HEIGHT = 0.12;
+const STACK_WIDTH = 0.24;
+const DESCRIPTION_SIZE = [0.5, 0.42];
+const PX_PER_METRE = 1000;
+
+const PAPER = '#fbf8f1';
+const INK = '#1b1b1b';
+const MUTED = '#7a6a53';
+
 const canvasGeometry = new THREE.PlaneGeometry(CANVAS_WIDTH, CANVAS_HEIGHT);
-const plaqueGeometry = new THREE.PlaneGeometry(0.52, 0.39);
 const textureLoader = new THREE.TextureLoader();
 
 // Crops the texture like CSS object-fit: cover.
@@ -28,16 +39,7 @@ function cover(texture, aspect) {
   texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2);
 }
 
-function canvasTexture(width, height, draw) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  draw(canvas.getContext('2d'));
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
+// Returns the baseline of the last line drawn.
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   let line = '';
   for (const word of text.split(' ')) {
@@ -51,6 +53,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     }
   }
   ctx.fillText(line, x, y);
+  return y;
 }
 
 function placeholderTexture(title) {
@@ -87,30 +90,108 @@ function mediaTexture({ image, video, title }) {
   return placeholderTexture(title);
 }
 
-function plaqueTexture({ title, tech, description, link }) {
-  return canvasTexture(512, 384, (ctx) => {
-    ctx.fillStyle = '#fbf8f1';
-    ctx.fillRect(0, 0, 512, 384);
-    ctx.fillStyle = '#1b1b1b';
-    ctx.font = 'bold 40px Georgia, serif';
-    ctx.fillText(title, 28, 64, 456);
-    ctx.fillStyle = '#7a6a53';
-    ctx.font = 'italic 24px Georgia, serif';
-    ctx.fillText(tech.join(' · '), 28, 104, 456);
+function paper(ctx) {
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+function titleTexture(title, width, height) {
+  return canvasTexture(width, height, (ctx) => {
+    paper(ctx);
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${Math.round(height * 0.55)}px Georgia, serif`;
+    ctx.fillText(title, width / 2, height / 2, width - 40);
+  });
+}
+
+// "STACK" header over one cell per tech entry: logo from public/stack/<name>.png with the name underneath.
+// Missing logos show the name's initial on a tile.
+function stackTexture(tech, width, height) {
+  const HEADER = 70;
+  const LABEL = 32;
+  const logos = new Map();
+
+  const draw = (ctx) => {
+    paper(ctx);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = INK;
+    ctx.font = 'bold 30px Georgia, serif';
+    ctx.fillText('STACK', width / 2, 38);
+    ctx.fillStyle = MUTED;
+    ctx.fillRect(24, HEADER - 10, width - 48, 2);
+
+    const cell = Math.min((height - HEADER - 12) / Math.max(tech.length, 1), width);
+    const icon = Math.max(16, Math.min(width - 60, cell - LABEL - 12));
+    tech.forEach((name, i) => {
+      const top = HEADER + i * cell + (cell - icon - LABEL) / 2;
+      const left = (width - icon) / 2;
+      const logo = logos.get(name);
+      if (logo) {
+        drawContained(ctx, logo, left, top, icon);
+      } else {
+        ctx.fillStyle = '#e9e2d3';
+        ctx.fillRect(left, top, icon, icon);
+        ctx.fillStyle = MUTED;
+        ctx.font = `bold ${Math.round(icon * 0.5)}px Georgia, serif`;
+        ctx.fillText(name.charAt(0).toUpperCase(), width / 2, top + icon / 2);
+      }
+      ctx.fillStyle = INK;
+      ctx.font = '22px Georgia, serif';
+      ctx.fillText(name, width / 2, top + icon + LABEL / 2 + 4, width - 16);
+    });
+  };
+
+  const texture = canvasTexture(width, height, draw);
+  for (const name of tech) {
+    const logo = new Image();
+    logo.onload = () => {
+      logos.set(name, logo);
+      draw(texture.image.getContext('2d'));
+      texture.needsUpdate = true;
+    };
+    logo.src = `/stack/${encodeURIComponent(name)}.png`;
+  }
+  return texture;
+}
+
+function descriptionTexture({ description, contributors = [], link }, width, height) {
+  return canvasTexture(width, height, (ctx) => {
+    paper(ctx);
+    const margin = 28;
+    const textWidth = width - margin * 2;
     ctx.fillStyle = '#333333';
     ctx.font = '24px Georgia, serif';
-    wrapText(ctx, description, 28, 150, 456, 32);
+    const y = wrapText(ctx, description, margin, 48, textWidth, 32);
+
+    if (contributors.length) {
+      ctx.fillStyle = MUTED;
+      ctx.font = 'italic bold 20px Georgia, serif';
+      ctx.fillText('Contributors', margin, y + 52);
+      ctx.fillStyle = '#333333';
+      ctx.font = '22px Georgia, serif';
+      wrapText(ctx, contributors.join(', '), margin, y + 82, textWidth, 28);
+    }
     if (link) {
-      ctx.fillStyle = '#7a6a53';
+      ctx.fillStyle = MUTED;
       ctx.font = 'italic 20px Georgia, serif';
-      ctx.fillText('Click the painting to open', 28, 356);
+      ctx.fillText('Click the painting to open', margin, height - 24);
     }
   });
 }
 
-// Prepares the loaded Blender frame to be cloned per project.
-// Position only aligns the model with its canvas; hallway placement lives in GALLERY in projectFloor.js.
+function panel(texture, width, height) {
+  return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture }));
+}
+
+const px = (metres) => Math.round(metres * PX_PER_METRE);
+
+// Prepares the loaded Blender frame to be cloned per project, and measures it so panels can sit around it.
+// Position only aligns the model with its canvas; wall placement lives in WALL_SLOTS in projectFloor.js.
 export function prepareFrameTemplate(frame) {
+  frame.removeFromParent();
   frame.position.set(0, 0, 0);
   frame.quaternion.copy(FRAME_ROTATION);
   frame.traverse((child) => {
@@ -118,19 +199,35 @@ export function prepareFrameTemplate(frame) {
     if (child.material.map) child.visible = false; // placeholder canvas, replaced by project media
     else child.material.metalness = 0;
   });
+  frame.updateMatrixWorld(true);
+  frame.userData.size = new THREE.Box3().setFromObject(frame).getSize(new THREE.Vector3());
   return frame;
 }
 
-// A framed project with its wall label, facing local +Z. labelSide: 1 puts the label on the local +X side, -1 on -X.
-export function createPainting(project, frameTemplate, { labelSide = 1 } = {}) {
-  const painting = new THREE.Group();
+// A framed project facing local +Z: title above, tech stack column to the left, description to the right.
+// scale enlarges the whole arrangement.
+export function createPainting(project, frameTemplate, { scale = 1 } = {}) {
+  const frame = frameTemplate.userData.size;
 
   const canvas = new THREE.Mesh(canvasGeometry, new THREE.MeshBasicMaterial({ map: mediaTexture(project) }));
   canvas.position.z = 0.008;
 
-  const plaque = new THREE.Mesh(plaqueGeometry, new THREE.MeshBasicMaterial({ map: plaqueTexture(project) }));
-  plaque.position.set(labelSide * 0.94, -0.12, 0.005);
+  const title = panel(titleTexture(project.title, px(frame.x), px(TITLE_HEIGHT)), frame.x, TITLE_HEIGHT);
+  title.position.set(0, frame.y / 2 + PANEL_GAP + TITLE_HEIGHT / 2, 0.005);
 
-  painting.add(frameTemplate.clone(), canvas, plaque);
+  const stack = panel(stackTexture(project.tech, px(STACK_WIDTH), px(frame.y)), STACK_WIDTH, frame.y);
+  stack.position.set(-(frame.x / 2 + PANEL_GAP + STACK_WIDTH / 2), 0, 0.005);
+
+  const [descriptionWidth, descriptionHeight] = DESCRIPTION_SIZE;
+  const description = panel(
+    descriptionTexture(project, px(descriptionWidth), px(descriptionHeight)),
+    descriptionWidth,
+    descriptionHeight
+  );
+  description.position.set(frame.x / 2 + PANEL_GAP + descriptionWidth / 2, 0, 0.005);
+
+  const painting = new THREE.Group();
+  painting.add(frameTemplate.clone(), canvas, title, stack, description);
+  painting.scale.setScalar(scale);
   return painting;
 }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { canvasTexture, drawContained } from '../../utils/canvas.js';
 
 const TARGET_RADIUS = 0.8;
 
@@ -41,10 +42,7 @@ function drawFace(ctx, name, logo) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   if (logo) {
-    const width = logo.naturalWidth || LOGO_BOX;
-    const height = logo.naturalHeight || LOGO_BOX;
-    const scale = Math.min(LOGO_BOX / width, LOGO_BOX / height);
-    ctx.drawImage(logo, CENTER - (width * scale) / 2, CENTER - (height * scale) / 2, width * scale, height * scale);
+    drawContained(ctx, logo, CENTER - LOGO_BOX / 2, CENTER - LOGO_BOX / 2, LOGO_BOX);
   } else {
     ctx.fillStyle = '#1c1c1c';
     ctx.font = 'bold 52px system-ui, sans-serif';
@@ -59,18 +57,12 @@ function drawFace(ctx, name, logo) {
 }
 
 function faceTexture({ name, image }) {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = SIZE;
-  const ctx = canvas.getContext('2d');
-  drawFace(ctx, name, null);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = canvasTexture(SIZE, SIZE, (ctx) => drawFace(ctx, name, null));
 
   if (image) {
     const logo = new Image();
     logo.onload = () => {
-      drawFace(ctx, name, logo);
+      drawFace(texture.image.getContext('2d'), name, logo);
       texture.needsUpdate = true;
     };
     logo.onerror = () => console.error(`Stack logo failed to load: ${image}`);

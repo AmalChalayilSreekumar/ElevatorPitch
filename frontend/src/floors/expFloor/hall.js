@@ -1,12 +1,13 @@
 import * as THREE from 'three';
+import { createDoorwayWall } from '../doorwayWall.js';
+import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
 
 // Encloses every point of track.js CONTROL_POINTS with clearance; the front wall sits flush with the elevator.
 const MIN_X = -27;
 const MAX_X = 33;
-const FRONT_Z = -0.5;
+const FRONT_Z = ELEVATOR_FRONT.z;
 const BACK_Z = -42.5;
 const HEIGHT = 17;
-const DOORWAY = { halfWidth: 1.55, height: 3.3 };
 
 const STAR_COUNT = 700;
 const STRIP_SPACING = 8;
@@ -108,15 +109,7 @@ export function createHall() {
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, HEIGHT), wallMaterial);
   backWall.position.set(centerX, HEIGHT / 2, BACK_Z);
 
-  // Faces -Z after the half turn, so shape x is mirrored world x.
-  const frontShape = new THREE.Shape()
-    .moveTo(-MAX_X, 0).lineTo(-MIN_X, 0).lineTo(-MIN_X, HEIGHT).lineTo(-MAX_X, HEIGHT).closePath();
-  frontShape.holes.push(new THREE.Path()
-    .moveTo(-DOORWAY.halfWidth, 0).lineTo(-DOORWAY.halfWidth, DOORWAY.height)
-    .lineTo(DOORWAY.halfWidth, DOORWAY.height).lineTo(DOORWAY.halfWidth, 0).closePath());
-  const frontWall = new THREE.Mesh(new THREE.ShapeGeometry(frontShape), wallMaterial);
-  frontWall.rotation.y = Math.PI;
-  frontWall.position.z = FRONT_Z;
+  const frontWall = createDoorwayWall({ minX: MIN_X, maxX: MAX_X, height: HEIGHT, z: FRONT_Z }, wallMaterial);
 
   const hall = new THREE.Group();
   hall.add(

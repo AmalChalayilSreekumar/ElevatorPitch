@@ -1,16 +1,24 @@
-// Shooting range targets, dealt across the lanes in order (front lane first).
-// image: path relative to public/ (e.g. '/stack/python.png'); null prints the name in the bullseye instead.
-// SVG logos need width/height attributes on the root <svg> so they can be drawn onto the target.
+// The tech stack, used twice on the stack floor:
+//  - range targets pop up one at a time in this order;
+//  - the boards above the counter list each entry under its `board` title.
+// image: path relative to public/ (e.g. '/stack/Python.png'); null prints the name instead.
+// SVG logos need width/height attributes on the root <svg> so they can be drawn onto canvases.
+
+// Board titles, left to right (the gun's sign hangs between the 2nd and 3rd).
+export const stackBoards = ['Frameworks','Languages', 'Data & ML', 'Databases & Tools'];
+
 export const stack = [
-  { name: 'JavaScript', image: '/stack/JavaScript.png' },
-  { name: 'React.js', image: '/stack/React.png' },
-  { name: 'Node.js', image: '/stack/Node.png' },
-  { name: 'Python', image: '/stack/Python.png' },
-  { name: 'Pandas', image: '/stack/Pandas.png' },
-  { name: 'Matplotlib', image: '/stack/Python.png' },
-  { name: 'Java', image: '/stack/Java.png' },
-  { name: 'C', image: '/stack/C.png' },
-  { name: 'PostgreSQL', image: '/stack/python.png' },
-  { name: 'TypeScript', image: '/stack/TypeScript.png' },
-  { name: 'Three.js', image: '/stack/python.png' },
+  { name: 'JavaScript', image: '/stack/JavaScript.png', board: 'Languages' },
+  { name: 'React.js', image: '/stack/React.png', board: 'Frameworks' },
+  { name: 'Node.js', image: '/stack/Node.png', board: 'Frameworks' },
+  { name: 'Python', image: '/stack/Python.png', board: 'Languages' },
+  { name: 'Pandas', image: '/stack/Pandas.png', board: 'Data & ML' },
+  { name: 'Matplotlib', image: '/stack/Matplotlib.png', board: 'Data & ML' },
+  { name: 'PyTorch', image: '/stack/PyTorch.png', board: 'Data & ML' },
+  { name: 'OpenCV', image: '/stack/OpenCV.png', board: 'Data & ML' },
+  { name: 'Java', image: '/stack/Java.png', board: 'Languages' },
+  { name: 'C', image: '/stack/C.png', board: 'Languages' },
+  { name: 'PostgreSQL', image: '/stack/PostgreSQL.png', board: 'Databases & Tools' },
+  { name: 'TypeScript', image: '/stack/TypeScript.png', board: 'Languages' },
+  { name: 'Three.js', image: '/stack/Three.png', board: 'Frameworks' },
 ];

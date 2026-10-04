@@ -19,8 +19,9 @@ export function createTimelineCard() {
       card.style.setProperty('--accent', job.color);
       card.replaceChildren(
         node('p', 'exp-card__stop', `Stop ${index + 1} of ${total}`),
-        node('h2', null, job.role),
-        node('p', 'exp-card__meta', [job.company, job.period, job.location].filter(Boolean).join(' · ')),
+        node('h2', 'exp-card__role', job.role),
+        node('p', 'exp-card__company', job.company),
+        node('p', 'exp-card__meta', [job.period, job.location].filter(Boolean).join(' · ')),
         node('p', null, job.summary),
         highlights,
         node('p', 'exp-card__hint', isLast ? 'Space to ride back to the station' : 'Space to continue')
