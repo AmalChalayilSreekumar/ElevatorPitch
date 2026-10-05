@@ -12,6 +12,7 @@
   color: #e8ecf4;
   font: 16px/1.6 system-ui, sans-serif;
   cursor: pointer;
+  touch-action: pan-y;
   transition: opacity 0.6s ease;
 }
 
@@ -27,7 +28,8 @@
 .intro__kicker,
 .intro__title,
 .intro__status,
-.intro__prompt,
+.intro__prompt-title,
+.intro__mode-title,
 .intro__controls dt {
   font-family: 'Press Start 2P', monospace;
 }
@@ -55,8 +57,8 @@
 .intro__controls {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 8px 16px;
-  margin: 28px 0;
+  gap: 6px 14px;
+  margin: 0;
   font-size: 14px;
   color: #b8bcc8;
 }
@@ -72,6 +74,7 @@
 }
 
 .intro__bar {
+  margin-top: 28px;
   height: 12px;
   border: 2px solid #e8ecf4;
   padding: 2px;
@@ -92,13 +95,50 @@
 
 .intro__prompt {
   margin: 28px 0 0;
+  cursor: default;
+}
+
+.intro__prompt[hidden] {
+  display: none;
+}
+
+.intro__prompt-title {
+  margin: 0 0 16px;
   font-size: 12px;
   text-align: center;
   animation: intro-blink 1s steps(2, start) infinite;
 }
 
-.intro__prompt[hidden] {
-  display: none;
+.intro__modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.intro__mode {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 2px solid rgba(232, 236, 244, 0.35);
+  background: rgba(7, 9, 15, 0.6);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.intro__mode:hover,
+.intro__mode:focus-visible {
+  border-color: #e8ecf4;
+  background: rgba(27, 36, 64, 0.8);
+  outline: none;
+}
+
+.intro__mode-title {
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 @keyframes intro-blink {
@@ -106,5 +146,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro__prompt { animation: none; }
+  .intro__prompt-title { animation: none; }
 }

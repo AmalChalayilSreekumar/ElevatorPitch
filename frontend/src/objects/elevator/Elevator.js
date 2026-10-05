@@ -16,6 +16,10 @@ const MODEL_FACE_Z = -0.343;
 // The face sits just behind the floor's front wall so the two never z-fight.
 const FACE_INSET = 0.01;
 
+// Meshes passed to setPulsing breathe with this soft backlight glow.
+const PULSE_COLOR = 0xfff1d6;
+const PULSE_SPEED = 4;
+
 
 export function createElevator(renderer, scene){
     const dracoLoader = new DRACOLoader();
@@ -28,6 +32,10 @@ export function createElevator(renderer, scene){
     let doorActions = [];
     let displays = [];
     let displayText = '';
+    let model = null;
+    let pulseNames = [];
+    let pulseMaterials = [];
+    let pulse = 0;
 
     loader.load("./../../../blenderFiles/Elevator/ElevatorMain.glb", (gltf) => {
         const elevator = gltf.scene;
@@ -75,6 +83,9 @@ export function createElevator(renderer, scene){
             createFloorDisplay(elevator.getObjectByName(name), facing)
         );
         displays.forEach((show) => show(displayText));
+
+        model = elevator;
+        applyPulse();
     },
     (progress) => {
         console.log('Loading:', Math.round((progress.loaded / progress.total) * 100) + '%');
@@ -85,6 +96,20 @@ export function createElevator(renderer, scene){
     );
 
     let doorsOpen = false;
+
+    function applyPulse() {
+        pulseMaterials.forEach((material) => { material.emissiveIntensity = 0; });
+        pulseMaterials = pulseNames.map((name) => {
+            const mesh = model.getObjectByName(name);
+            // Own copy so the glow can't leak onto other meshes sharing the material.
+            if (!mesh.userData.pulseMaterial) {
+                mesh.material = mesh.userData.pulseMaterial = mesh.material.clone();
+                mesh.material.emissive.set(PULSE_COLOR);
+            }
+            return mesh.material;
+        });
+        pulse = 0;
+    }
 
     function setDoors(open) {
         if (open === doorsOpen || doorActions.length === 0) return Promise.resolve();
@@ -108,14 +133,25 @@ export function createElevator(renderer, scene){
     }
 
     return {
+        isOpen: () => doorsOpen,
         openDoors: () => setDoors(true),
         closeDoors: () => setDoors(false),
         setDisplay(text) {
             displayText = text;
             displays.forEach((show) => show(text));
         },
+        // Mesh names to pulse; [] stops. Applied once the model loads if called earlier.
+        setPulsing(names) {
+            pulseNames = names;
+            if (model) applyPulse();
+        },
         update(delta) {
             if (mixer) mixer.update(delta);
+            if (pulseMaterials.length) {
+                pulse += delta * PULSE_SPEED;
+                const intensity = 0.5 - 0.5 * Math.cos(pulse);
+                pulseMaterials.forEach((material) => { material.emissiveIntensity = intensity; });
+            }
         }
     };
 }

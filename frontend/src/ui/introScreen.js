@@ -10,16 +10,36 @@ function node(tag, className, text) {
   return el;
 }
 
-// Tracks THREE.DefaultLoadingManager, types out the pitch, and calls onStart once the player continues.
+function controlsList(controls) {
+  const list = node('dl', 'intro__controls');
+  for (const [key, action] of controls) list.append(node('dt', null, key), node('dd', null, action));
+  return list;
+}
+
+function modeButton(mode, label, controls) {
+  const button = node('button', 'intro__mode');
+  button.type = 'button';
+  button.dataset.mode = mode;
+  button.append(node('span', 'intro__mode-title', label), controlsList(controls));
+  return button;
+}
+
+// Tracks THREE.DefaultLoadingManager, types out the pitch, then asks how the player is playing.
+// onStart receives 'desktop' or 'mobile'; only those buttons start the game.
 export function createIntroScreen(profile, onStart) {
   const bar = node('div', 'intro__bar-fill');
   const status = node('p', 'intro__status', 'Loading 0%');
   const pitchLines = profile.pitch.map(() => node('p'));
-  const prompt = node('p', 'intro__prompt', 'Press any key to start');
-  prompt.hidden = true;
 
-  const controls = node('dl', 'intro__controls');
-  for (const [key, action] of profile.controls) controls.append(node('dt', null, key), node('dd', null, action));
+  const buttons = [
+    modeButton('desktop', 'Desktop / Laptop', profile.controls),
+    modeButton('mobile', 'Mobile', profile.touchControls),
+  ];
+  const modes = node('div', 'intro__modes');
+  modes.append(...buttons);
+  const prompt = node('div', 'intro__prompt');
+  prompt.append(node('p', 'intro__prompt-title', 'How are you playing?'), modes);
+  prompt.hidden = true;
 
   const barTrack = node('div', 'intro__bar');
   barTrack.append(bar);
@@ -29,7 +49,6 @@ export function createIntroScreen(profile, onStart) {
     node('p', 'intro__kicker', profile.title),
     node('h1', 'intro__title', profile.name),
     ...pitchLines,
-    controls,
     barTrack,
     status,
     prompt
@@ -80,20 +99,22 @@ export function createIntroScreen(profile, onStart) {
     refreshPrompt();
   }
 
-  // First input skips the typing; once everything is ready, the next one starts the game.
-  function handleInput() {
-    if (!typed) return finishTyping();
-    if (!loaded) return;
-
-    manager.onProgress = manager.onLoad = undefined;
-    window.removeEventListener('keydown', handleInput);
-    screen.removeEventListener('click', handleInput);
-    screen.classList.add('intro--leaving');
-    screen.addEventListener('transitionend', () => screen.remove(), { once: true });
-    onStart();
+  // Any input skips the typing; starting needs an explicit mode choice.
+  function skipTyping() {
+    if (!typed) finishTyping();
   }
 
-  window.addEventListener('keydown', handleInput);
-  screen.addEventListener('click', handleInput);
+  function start(mode) {
+    manager.onProgress = manager.onLoad = undefined;
+    window.removeEventListener('keydown', skipTyping);
+    screen.removeEventListener('click', skipTyping);
+    screen.classList.add('intro--leaving');
+    screen.addEventListener('transitionend', () => screen.remove(), { once: true });
+    onStart(mode);
+  }
+
+  for (const button of buttons) button.addEventListener('click', () => start(button.dataset.mode), { once: true });
+  window.addEventListener('keydown', skipTyping);
+  screen.addEventListener('click', skipTyping);
   typePitch();
 }

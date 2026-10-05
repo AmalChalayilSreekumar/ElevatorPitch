@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { stack } from '../../data/stack.js';
 import { createRange, RANGE } from './range.js';
 import { createTarget } from './target.js';
 import { createGun, createMuzzleFlash } from './gun.js';
@@ -29,6 +28,7 @@ const AIM = new THREE.Vector2(0, 0);
 const HALL_COLOR = 0x101114;
 
 const noRaycast = () => {};
+const NO_ACTIONS = [];
 
 function createCounterGun() {
   const gun = createGun();
@@ -39,7 +39,7 @@ function createCounterGun() {
   return gun;
 }
 
-export function createStackFloor(camera, look) {
+export function createStackFloor(camera, look, stack, stackBoards) {
   const group = new THREE.Group();
   const slots = stack.map((entry, index) => ({ entry, index, target: createTarget(entry), point: -1 }));
   const slotByFace = new Map(slots.map((slot) => [slot.target.face, slot]));
@@ -54,7 +54,7 @@ export function createStackFloor(camera, look) {
   viewmodel.visible = false;
   viewmodel.traverse((child) => { child.raycast = noRaycast; });
 
-  group.add(createRange(), createStackBoards(), counterGun, viewmodel);
+  group.add(createRange(), createStackBoards(stack, stackBoards), counterGun, viewmodel);
 
   const hud = createRangeHud(stack.length);
   const raycaster = new THREE.Raycaster();
@@ -70,6 +70,7 @@ export function createStackFloor(camera, look) {
   let nextSlot = 0;
   let lastPoint = -1;
   let respawns = [];
+  const armedActions = [{ label: 'Put down', run: putDown }];
 
   function spawn() {
     let slot;
@@ -125,9 +126,6 @@ export function createStackFloor(camera, look) {
     respawns.push(RESPAWN_DELAY);
   }
 
-  document.addEventListener('mousedown', (e) => {
-    if (armed && e.button === 0 && document.pointerLockElement) fire();
-  });
   document.addEventListener('keydown', (e) => {
     if (e.code === 'KeyE') putDown();
   });
@@ -176,5 +174,10 @@ export function createStackFloor(camera, look) {
     update,
     interactions: { rangeGun: pickUp },
     controlsLocked: () => armed,
+    primary() {
+      if (armed) fire();
+      return armed;
+    },
+    actions: () => (armed ? armedActions : NO_ACTIONS),
   };
 }

@@ -1,3 +1,5 @@
+import { isTouch } from '../../player/device.js';
+
 function node(tag, className, text) {
   const el = document.createElement(tag);
   if (className) el.className = className;
@@ -15,6 +17,7 @@ export function createTimelineCard() {
       const highlights = node('ul');
       highlights.append(...job.highlights.map((h) => node('li', null, h)));
       const isLast = index === total - 1;
+      const action = isTouch() ? 'Tap' : 'Space';
 
       card.style.setProperty('--accent', job.color);
       card.replaceChildren(
@@ -24,7 +27,7 @@ export function createTimelineCard() {
         node('p', 'exp-card__meta', [job.period, job.location].filter(Boolean).join(' · ')),
         node('p', null, job.summary),
         highlights,
-        node('p', 'exp-card__hint', isLast ? 'Space to ride back to the station' : 'Space to continue')
+        node('p', 'exp-card__hint', `${action} to ${isLast ? 'ride back to the station' : 'continue'}`)
       );
       card.hidden = false;
     },

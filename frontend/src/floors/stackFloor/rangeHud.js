@@ -1,3 +1,5 @@
+import { isTouch } from '../../player/device.js';
+
 const TOAST_MS = 1600;
 
 function node(tag, className, text) {
@@ -11,7 +13,7 @@ export function createRangeHud(total) {
   const tally = node('p', 'range-hud__tally');
   const toast = node('p', 'range-hud__toast');
   const hud = node('div', 'range-hud');
-  hud.append(tally, toast, node('p', 'range-hud__hint', 'Click to fire · E to put down'));
+  hud.append(tally, toast, node('p', 'range-hud__hint', isTouch() ? 'Tap to fire · Put down to leave' : 'Click to fire · E to put down'));
   hud.hidden = true;
   toast.hidden = true;
   document.body.appendChild(hud);

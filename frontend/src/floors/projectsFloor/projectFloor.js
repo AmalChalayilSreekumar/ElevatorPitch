@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { projects } from '../../data/projects.js';
 import { createPainting, prepareFrameTemplate } from './painting.js';
 import { createDoorwayWall } from '../doorwayWall.js';
 import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
@@ -34,7 +33,7 @@ const WALL_SLOTS = [
     { wall: 'right', along: SIDE_CENTER_Z, y: 1.75, scale: 1.8 },
 ];
 
-function hangPaintings(group, frameTemplate) {
+function hangPaintings(group, frameTemplate, projects) {
     const interactions = {};
     if (projects.length > WALL_SLOTS.length) {
         console.warn(`Projects floor has ${WALL_SLOTS.length} wall spots; ${projects.length - WALL_SLOTS.length} project(s) not hung.`);
@@ -89,7 +88,7 @@ function createRoom(materials) {
     return [leftWall, rightWall, floor, roof, backWall, frontWall];
 }
 
-export function createProjectFloor() {
+export function createProjectFloor(projects) {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('./../../../draco/');
 
@@ -144,7 +143,7 @@ export function createProjectFloor() {
         "./../../../blenderFiles/ProjectsFloor/ProjectsFloor.glb",
         (gltf) => {
             const frameTemplate = prepareFrameTemplate(gltf.scene.getObjectByName('Picture_Frame'));
-            Object.assign(interactions, hangPaintings(group, frameTemplate));
+            Object.assign(interactions, hangPaintings(group, frameTemplate, projects));
 
             group.add(...createRoom({ wall: roofMaterial, ground: groundMaterial, backWall: backWallMaterial }));
             resolve();

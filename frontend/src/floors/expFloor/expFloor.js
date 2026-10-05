@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { experience } from '../../data/experience.js';
 import { createTrack } from './track.js';
 import { createCart, RIDER_EYE } from './cart.js';
 import { createSign } from './sign.js';
 import { createTimelineCard } from './timelineCard.js';
 import { createHall } from './hall.js';
+import { isTouch } from '../../player/device.js';
 
 const GRAVITY = 9.8;
 // Lift speed up to the first peak, and the speed the cart crests at.
@@ -14,6 +14,7 @@ const BRAKE_DECEL = 8;
 const CREEP_SPEED = 0.3;
 const EXIT_POSITION = new THREE.Vector3(0, 1.7, -2.5);
 const HALL_COLOR = 0x05060f;
+const NO_ACTIONS = [];
 
 function createStation() {
   const station = new THREE.Group();
@@ -31,7 +32,7 @@ function createStation() {
   safetyEdge.position.set(0, 0.06, -4.3);
 
   const sign = createSign(
-    { title: 'Career Coaster', subtitle: 'Click On Cart', color: '#1d3557' },
+    { title: 'Career Coaster', subtitle: isTouch() ? 'Tap On Cart' : 'Click On Cart', color: '#1d3557' },
     { span: 3.2, height: 2.8 }
   );
   sign.position.z = -3.9;
@@ -40,7 +41,7 @@ function createStation() {
   return station;
 }
 
-export function createExpFloor(camera, look) {
+export function createExpFloor(camera, look, experience) {
   const group = new THREE.Group();
   const track = createTrack();
   const cart = createCart();
@@ -83,6 +84,7 @@ export function createExpFloor(camera, look) {
   let distance = 0;
   let speed = 0;
   let nextStop = 0;
+  const heldActions = [{ label: 'Continue', run: resume }];
 
   function board() {
     if (riding) return;
@@ -147,5 +149,10 @@ export function createExpFloor(camera, look) {
     update,
     interactions: { coasterCart: board },
     controlsLocked: () => riding,
+    primary() {
+      if (held) resume();
+      return riding;
+    },
+    actions: () => (held ? heldActions : NO_ACTIONS),
   };
 }

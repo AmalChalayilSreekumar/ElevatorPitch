@@ -13,6 +13,9 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     canvas {
@@ -93,9 +96,7 @@
     .prompt {
       position: fixed;
       inset: 0;
-      background: rgba(255, 130, 40, 0.2);
       pointer-events: none;
-      animation: prompt-fade 0.5s ease-out;
     }
 
     .prompt[hidden] { display: none; }
@@ -110,10 +111,34 @@
       border-radius: 8px;
       background: rgba(15, 18, 30, 0.85);
       color: #f1f1f1;
+      width: max-content;
+      max-width: calc(100vw - 64px);
       font: 16px/1.45 system-ui, sans-serif;
-      white-space: nowrap;
+      text-align: center;
+      white-space: pre-line;
       animation: prompt-rise 0.4s ease-out;
     }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: calc(100vw - 32px);
+      margin: 0;
+      padding: 8px 16px;
+      border-bottom: 3px solid #ff8228;
+      border-radius: 8px;
+      background: rgba(15, 18, 30, 0.85);
+      color: #f1f1f1;
+      font: 15px/1.45 system-ui, sans-serif;
+      text-align: center;
+      pointer-events: none;
+      animation: prompt-fade 0.25s ease-out;
+    }
+
+    .toast[hidden] { display: none; }
 
     @keyframes prompt-fade {
       from { opacity: 0; }

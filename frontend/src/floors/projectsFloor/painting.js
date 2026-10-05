@@ -177,7 +177,7 @@ function descriptionTexture({ description, contributors = [], link }, width, hei
     if (link) {
       ctx.fillStyle = MUTED;
       ctx.font = 'italic 20px Georgia, serif';
-      ctx.fillText('Click the painting to open', margin, height - 24);
+      ctx.fillText('Click or tap the painting to open', margin, height - 24);
     }
   });
 }

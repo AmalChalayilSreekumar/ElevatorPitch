@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { stack, stackBoards } from '../../data/stack.js';
 import { RANGE } from './range.js';
 import { canvasTexture, drawContained } from '../../utils/canvas.js';
 
@@ -142,7 +141,7 @@ function createSheet(texture) {
   return sheet;
 }
 
-function groupByBoard() {
+function groupByBoard(stack, stackBoards) {
   const boards = new Map(stackBoards.map((title) => [title, []]));
   for (const entry of stack) {
     const entries = boards.get(entry.board);
@@ -152,8 +151,8 @@ function groupByBoard() {
   return boards;
 }
 
-export function createStackBoards() {
-  const boards = [...groupByBoard()].map(([title, entries]) => boardTexture(title, entries));
+export function createStackBoards(stack, stackBoards) {
+  const boards = [...groupByBoard(stack, stackBoards)].map(([title, entries]) => boardTexture(title, entries));
   const half = Math.ceil(boards.length / 2);
   const textures = [...boards.slice(0, half), signTexture(), ...boards.slice(half)];
 
