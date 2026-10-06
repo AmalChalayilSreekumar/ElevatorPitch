@@ -14,7 +14,7 @@ export const profile = {
   ],
   touchControls: [
     ['Left stick', 'Move'],
-    ['Right stick', 'Look around'],
+    ['Drag', 'Look around'],
     ['Tap', 'Press buttons and interact'],
   ],
 };

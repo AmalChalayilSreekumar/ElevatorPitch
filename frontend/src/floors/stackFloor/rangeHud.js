@@ -18,19 +18,28 @@ export function createRangeHud(total) {
   toast.hidden = true;
   document.body.appendChild(hud);
 
+  // First-shot hint under the crosshair; lives outside the HUD, whose transform would anchor it to the HUD.
+  const callout = node('p', 'range-callout', `Aim at the floating target and ${isTouch() ? 'tap' : 'click'} to shoot!`);
+  callout.hidden = true;
+  document.body.appendChild(callout);
+
   let toastTimer = null;
   let hits = 0;
   const setTally = (count) => { tally.textContent = `${count} / ${total} hit`; };
   setTally(0);
 
   return {
+    // Each pick-up shows the shooting hint again until the next hit.
     show() {
       hud.hidden = false;
+      callout.hidden = false;
     },
     hide() {
       hud.hidden = true;
+      callout.hidden = true;
     },
     hit(name, count) {
+      callout.hidden = true;
       const cleared = count === total && hits < total;
       hits = count;
       setTally(count);

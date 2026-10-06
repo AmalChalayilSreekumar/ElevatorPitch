@@ -47,16 +47,13 @@ export function objectInteraction(scene, camera, renderer) {
             newSelected = findInteractive(intersects[i].object);
         }
 
+        // A stand-in (e.g. a button's label plate) outlines itself and its target, and reports the target's name.
+        const target = newSelected?.userData.pressTarget ?? newSelected;
         if (newSelected !== currentSelected) {
             currentSelected = newSelected;
-            outlinePass.selectedObjects = newSelected ? [newSelected] : [];
+            outlinePass.selectedObjects = !newSelected ? [] : target === newSelected ? [newSelected] : [newSelected, target];
         }
-        if (currentSelected){
-            return currentSelected.name;
-        }
-        else{
-            return null
-        }
+        return target?.name ?? null;
     }
 
     return { composer, updateOutline };

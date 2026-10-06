@@ -9,6 +9,7 @@ import { objectInteraction } from './player/objectInteractions.js';
 import { createFloorManager } from './floors/floorManager.js';
 import { createIntroScreen } from './ui/introScreen.js';
 import { createTutorial } from './ui/tutorial.js';
+import { createRotateHint } from './ui/rotateHint.js';
 import { loadContent } from './api/content.js';
 
 // Fetched before any model starts loading, so the intro screen is listening when the loading manager finishes.
@@ -42,8 +43,9 @@ let touch = null;
 createIntroScreen(content.profile, (mode) => {
   setTouchMode(mode === 'mobile');
   if (isTouch()) {
-    touch = createTouchControls(look);
+    touch = createTouchControls(look, renderer.domElement, () => floors.primary(hovered));
     touch.show();
+    createRotateHint();
   } else {
     Promise.resolve(renderer.domElement.requestPointerLock()).catch(() => {});
   }
@@ -54,10 +56,10 @@ createIntroScreen(content.profile, (mode) => {
 const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
 let hovered = null;
 
-// Desktop clicks count once the pointer is locked (the first click only locks it); in mobile mode every tap counts.
+// Desktop clicks count once the pointer is locked (the first click only locks it); mobile taps come from touch controls.
 renderer.domElement.addEventListener('pointerdown', (e) => {
-  if (!playing || e.button !== 0) return;
-  if (isTouch() || document.pointerLockElement === renderer.domElement) floors.primary(hovered);
+  if (!playing || e.button !== 0 || isTouch()) return;
+  if (document.pointerLockElement === renderer.domElement) floors.primary(hovered);
 });
 
 
@@ -68,7 +70,6 @@ function animate() {
   elevator.update(delta);
   floors.update(delta);
   if (playing) {
-    touch?.update(delta);
     touch?.setActions(floors.actions());
     if (!floors.controlsLocked()) updateMovement(touch?.move);
   }

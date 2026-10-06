@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RANGE } from './range.js';
+import { isTouch } from '../../player/device.js';
 import { canvasTexture, drawContained } from '../../utils/canvas.js';
 
 // Paper sheets hung in a row above the counter: the stack boards either side of the "click the gun" sign.
@@ -118,7 +119,7 @@ function signTexture() {
     ctx.fillText('STACK RANGE', W / 2, 140);
     ctx.fillStyle = INK;
     ctx.font = 'bold 150px system-ui, sans-serif';
-    ['CLICK', 'GUN', 'TO', 'PLAY'].forEach((word, i) => ctx.fillText(word, W / 2, 330 + i * 160, W - MARGIN * 2));
+    [isTouch() ? 'TAP' : 'CLICK', 'GUN', 'TO', 'PLAY'].forEach((word, i) => ctx.fillText(word, W / 2, 330 + i * 160, W - MARGIN * 2));
     ctx.fillStyle = ACCENT;
     ctx.font = '120px system-ui, sans-serif';
     ctx.fillText('▼', W / 2, 1040);

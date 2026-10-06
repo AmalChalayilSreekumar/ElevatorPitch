@@ -7,7 +7,7 @@
 export const projects = [
   {
     title: 'Autonomous Drone with Fruitfly Brain',
-    description: 'A Brian2 neural network built from real FlyWire connectome data flies a drone, using a fly\'s escape and stabilization circuits. The same controller runs on a PyBullet simulator or a real DJI Tello, with a safety layer that overrides it near obstacles. A YOLOv8 and MobileNetV2 pipeline finds and "eats" bananas, and the escape reflex passed 5/5 swat tests with no false positives.',
+    description: 'A Brian2 neural network built from real FlyWire connectome data flies a drone, using a fly\'s escape and stabilization circuits. Controller runs on a PyBullet simulator or a real DJI Tello, with safety layer that overrides near obstacles. A YOLOv8 model finds and "eats" bananas.',
     tech: ['Python', 'PyTorch', 'OpenCV'],
     image: null,
     video: null,
@@ -26,7 +26,7 @@ export const projects = [
   {
     title: 'This Website',
     description: 'An interactive 3D elevator portfolio built with Three.js and Blender, where each floor (a project gallery, a career roller coaster and a tech-stack shooting range) turns a résumé into something you can explore.',
-    tech: ['Three', 'Vite', 'JavaScript'],
+    tech: ['Three.js', 'Vite', 'JavaScript'],
     image: null,
     video: null,
     link: null,

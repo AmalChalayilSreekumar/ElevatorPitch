@@ -20,6 +20,7 @@ export const stack = [
   { name: 'C', image: '/stack/C.png', board: 'Languages' },
   { name: 'PostgreSQL', image: '/stack/PostgreSQL.png', board: 'Databases & Tools' },
   { name: 'TypeScript', image: '/stack/TypeScript.png', board: 'Languages' },
-  { name: 'Three.js', image: '/stack/Three.png', board: 'Frameworks' },
-  { name: 'Vite', image: '/stack/Three.png', board: 'Frameworks' },
+  { name: 'Three.js', image: '/stack/Three.js.png', board: 'Frameworks' },
+  { name: 'Vite', image: '/stack/Vite.png', board: 'Frameworks' },
+  { name: 'Vite', image: '/stack/FastAPI.png', board: 'Frameworks' },
 ];

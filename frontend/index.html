@@ -112,7 +112,8 @@
       background: rgba(15, 18, 30, 0.85);
       color: #f1f1f1;
       width: max-content;
-      max-width: calc(100vw - 64px);
+      max-width: calc(100vw - 32px);
+      box-sizing: border-box;
       font: 16px/1.45 system-ui, sans-serif;
       text-align: center;
       white-space: pre-line;
@@ -139,6 +140,56 @@
     }
 
     .toast[hidden] { display: none; }
+
+    .prompt__actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .prompt__action,
+    .return-chip {
+      padding: 8px 14px;
+      border: 1px solid rgba(241, 241, 241, 0.5);
+      border-radius: 8px;
+      background: rgba(15, 18, 30, 0.85);
+      color: #f1f1f1;
+      font: 600 14px/1.2 system-ui, sans-serif;
+      pointer-events: auto;
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+
+    .prompt__text--closable {
+      padding-right: 40px;
+    }
+
+    .prompt__close {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #b8bcc8;
+      font: 22px/1 system-ui, sans-serif;
+      pointer-events: auto;
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+
+    .prompt__close:hover { color: #f1f1f1; }
+
+    .return-chip {
+      position: fixed;
+      top: max(16px, env(safe-area-inset-top));
+      right: 16px;
+    }
+
+    .return-chip[hidden] { display: none; }
 
     @keyframes prompt-fade {
       from { opacity: 0; }
@@ -177,6 +228,41 @@
     }
     .range-hud__toast { margin: 0; font-size: 22px; font-weight: 700; color: #ffd166; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8); }
     .range-hud__hint { margin: 0; font-size: 13px; color: #b8bcc8; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8); }
+
+    .range-callout {
+      position: fixed;
+      top: calc(50% + 40px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: calc(100vw - 32px);
+      box-sizing: border-box;
+      margin: 0;
+      padding: 8px 16px;
+      border: 2px solid #ffd166;
+      border-radius: 10px;
+      background: rgba(15, 18, 30, 0.88);
+      color: #ffd166;
+      font: 700 16px/1.35 system-ui, sans-serif;
+      text-align: center;
+      text-wrap: balance;
+      pointer-events: none;
+      animation: range-callout-in 0.3s ease-out, range-callout-bob 1.4s ease-in-out 0.3s infinite;
+    }
+
+    .range-callout[hidden] { display: none; }
+
+    @keyframes range-callout-in {
+      from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+    }
+
+    @keyframes range-callout-bob {
+      50% { transform: translate(-50%, -4px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .range-callout { animation: none; }
+    }
   </style>
   </head>
   <body>

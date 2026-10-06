@@ -1,0 +1,66 @@
+.rotate-hint {
+  display: none;
+}
+
+@media (orientation: portrait) {
+  .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, #1b2440 0%, #07090f 75%);
+    color: #e8ecf4;
+    font: 16px/1.5 system-ui, sans-serif;
+    text-align: center;
+    touch-action: none;
+  }
+}
+
+.rotate-hint__phone {
+  width: 44px;
+  height: 76px;
+  margin-bottom: 16px;
+  border: 3px solid #e8ecf4;
+  border-radius: 9px;
+  box-shadow: inset 0 -8px 0 -5px #e8ecf4;
+  animation: rotate-hint-turn 2.4s ease-in-out infinite;
+}
+
+.rotate-hint__title {
+  margin: 0;
+  font: 14px/1.6 'Press Start 2P', monospace;
+}
+
+.rotate-hint__text {
+  max-width: 300px;
+  margin: 0;
+  color: #b8bcc8;
+}
+
+.rotate-hint__dismiss {
+  margin-top: 20px;
+  padding: 8px 14px;
+  border: 1px solid rgba(232, 236, 244, 0.35);
+  border-radius: 8px;
+  background: none;
+  color: #b8bcc8;
+  font: 14px/1.2 system-ui, sans-serif;
+  touch-action: manipulation;
+}
+
+@keyframes rotate-hint-turn {
+  0%, 20% { transform: rotate(0deg); }
+  50%, 80% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotate-hint__phone { animation: none; transform: rotate(-90deg); }
+}

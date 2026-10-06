@@ -5,9 +5,34 @@
 
 .touch-controls[hidden] { display: none; }
 
-/* On-screen prompts sit above the sticks instead of behind them. */
+/* On-screen prompts sit above the stick in portrait; in landscape there's room beside it, which keeps the view clear. */
 .touch-mode .prompt__text {
   bottom: calc(var(--stick-bottom) + var(--stick-size) + 20px);
+}
+
+@media (orientation: landscape) {
+  /* Centred in the space right of the stick (there's nothing on the right). */
+  .touch-mode .prompt__text {
+    bottom: var(--stick-bottom);
+    left: calc(24px + var(--stick-size) + 16px);
+    right: 16px;
+    width: fit-content;
+    max-width: none;
+    margin-inline: auto;
+    transform: none;
+    animation-name: prompt-fade;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 360px) {
+  .touch-mode .prompt__text {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  .touch-mode .prompt__text--closable {
+    padding-right: 40px;
+  }
 }
 
 .joystick {
@@ -26,7 +51,6 @@
 }
 
 .joystick--move { left: 24px; }
-.joystick--look { right: 24px; }
 
 .joystick__knob {
   width: 44%;

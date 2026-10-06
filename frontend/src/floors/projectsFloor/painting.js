@@ -169,7 +169,7 @@ function descriptionTexture({ description, contributors = [], link }, width, hei
     if (contributors.length) {
       ctx.fillStyle = MUTED;
       ctx.font = 'italic bold 20px Georgia, serif';
-      ctx.fillText('Contributors', margin, y + 52);
+      ctx.fillText('Authors', margin, y + 52);
       ctx.fillStyle = '#333333';
       ctx.font = '22px Georgia, serif';
       wrapText(ctx, contributors.join(', '), margin, y + 82, textWidth, 28);

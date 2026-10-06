@@ -3,6 +3,8 @@ import { createExpFloor } from './expFloor/expFloor.js';
 import { createStackFloor } from './stackFloor/stackFloor.js';
 import { createPrompt } from '../ui/prompt.js';
 import { createToast } from '../ui/toast.js';
+import { createFloorGuide } from './floorGuide.js';
+import { isTouch } from '../player/device.js';
 import { ELEVATOR_FRONT } from '../objects/elevator/Elevator.js';
 
 // Elevator button mesh name -> floor key. Panel top to bottom: 1 (Experience), 3 (Stack), 2 (Projects), buttonInner (close doors).
@@ -38,9 +40,10 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // primary() gets first say on a click/tap and returns true if it used it; actions() returns a stable array of
 // { label, run } for the touch context buttons.
 export function createFloorManager(scene, camera, look, elevator, content) {
+    const guide = createFloorGuide(camera, look, elevator);
     const factories = {
         projects: () => createProjectFloor(content.projects),
-        experience: () => createExpFloor(camera, look, content.experience),
+        experience: () => createExpFloor(camera, look, content.experience, () => guide.complete("That's the whole ride!")),
         stack: () => createStackFloor(camera, look, content.stack, content.stackBoards),
     };
     const floors = {};
@@ -49,7 +52,7 @@ export function createFloorManager(scene, camera, look, elevator, content) {
     let travelling = false;
     // Seconds spent in the car since the doors opened on this floor; null once the player has stepped out.
     let idleInCar = null;
-    const exitPrompt = createPrompt('The doors are open. Walk out with W to explore.');
+    const exitPrompt = createPrompt('');
     const toast = createToast();
     let markSelected;
     const firstSelection = new Promise((resolve) => { markSelected = resolve; });
@@ -72,6 +75,7 @@ export function createFloorManager(scene, camera, look, elevator, content) {
 
         travelling = true;
         markSelected();
+        guide.leave();
         try {
             await elevator.closeDoors();
             elevator.setDisplay(`${FLOORS[name].level > FLOORS[currentName].level ? '▲' : '▼'} ${label(name)}`);
@@ -92,6 +96,8 @@ export function createFloorManager(scene, camera, look, elevator, content) {
             if (current) {
                 await elevator.openDoors();
                 idleInCar = 0;
+                exitPrompt.setText(`The doors are open. Walk out with ${isTouch() ? 'the left stick' : 'W'} to explore.`);
+                guide.arrive(Object.keys(FLOOR_BUTTONS).filter((button) => FLOOR_BUTTONS[button] !== currentName));
             }
             travelling = false;
         }
@@ -129,7 +135,8 @@ export function createFloorManager(scene, camera, look, elevator, content) {
     return {
         preload: (name) => load(name),
         floorButtons: Object.keys(FLOOR_BUTTONS),
-        touchPrompt: (objectName) => (travelling ? null : floorPrompts[objectName] ?? null),
+        touchPrompt: (objectName) =>
+            (travelling || FLOOR_BUTTONS[objectName] === currentName ? null : floorPrompts[objectName] ?? null),
         firstSelection,
         primary(objectName) {
             if (!current?.primary?.()) interact(objectName);
@@ -138,6 +145,7 @@ export function createFloorManager(scene, camera, look, elevator, content) {
         update(delta) {
             current?.update?.(delta);
             updateExitPrompt(delta);
+            guide.update(delta, controlsLocked());
         },
         controlsLocked,
     };

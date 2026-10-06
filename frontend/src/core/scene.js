@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { CAR_SPAWN } from '../objects/elevator/Elevator.js';
 
 
                                     
@@ -24,9 +25,7 @@ export function initScene() {
   const nearCPlane = 0.1;                                       
   const farCPlane = 1000;   
   const camera = new THREE.PerspectiveCamera(fov, aspectRatio, nearCPlane, farCPlane);
-  const xPos = 0, yPos = 1.7, zPos = 2.0;
-
-  camera.position.set(xPos, yPos, zPos);
+  camera.position.copy(CAR_SPAWN);
   camera.rotation.order = 'YXZ';           
 
 // Soft fill light — prevents everything from being pitch black

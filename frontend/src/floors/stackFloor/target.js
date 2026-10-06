@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { canvasTexture, drawContained } from '../../utils/canvas.js';
 
-const TARGET_RADIUS = 0.8;
+const TARGET_RADIUS = 1;
 
 const POP_IN_TIME = 0.35;
 const POP_OUT_TIME = 0.25;

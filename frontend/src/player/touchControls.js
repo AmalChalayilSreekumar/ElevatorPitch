@@ -2,13 +2,14 @@ import { createJoystick } from './joystick.js';
 import { node } from '../ui/dom.js';
 import './touchControls.css';
 
-// Radians per second at full deflection of the look stick.
-const LOOK_RATE = 1.4;
+// Radians turned per pixel dragged on the screen.
+const DRAG_LOOK = 0.005;
+// A touch that moves less than this many pixels before lifting counts as a tap, not a look drag.
+const TAP_SLOP = 10;
 
-// Left stick moves, right stick looks, and context buttons stand in for keys a phone doesn't have.
-export function createTouchControls(look) {
+// Left stick moves, dragging anywhere else looks, a tap interacts, and context buttons stand in for missing keys.
+export function createTouchControls(look, canvas, onTap) {
   const moveStick = createJoystick('joystick--move');
-  const lookStick = createJoystick('joystick--look');
   const actionBar = node('div', 'touch-actions');
   const hoverButton = node('button', 'touch-hover');
   hoverButton.type = 'button';
@@ -16,25 +17,51 @@ export function createTouchControls(look) {
 
   const root = node('div', 'touch-controls');
   root.hidden = true;
-  root.append(moveStick.el, lookStick.el, actionBar, hoverButton);
+  root.append(moveStick.el, actionBar, hoverButton);
   document.body.append(root);
 
   let shownActions = null;
   let hoverAction = null;
   hoverButton.addEventListener('click', () => hoverAction?.run());
 
+  // One finger at a time drives the look; the move stick captures its own pointer, so both work together.
+  let dragId = null;
+  let lastX = 0;
+  let lastY = 0;
+  let travelled = 0;
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (dragId !== null) return;
+    dragId = e.pointerId;
+    canvas.setPointerCapture(dragId);
+    lastX = e.clientX;
+    lastY = e.clientY;
+    travelled = 0;
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== dragId) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    travelled += Math.hypot(dx, dy);
+    look.turn(dx * DRAG_LOOK, dy * DRAG_LOOK);
+  });
+  // Interactions fire on release so that starting a drag never presses whatever is under the crosshair.
+  canvas.addEventListener('pointerup', (e) => {
+    if (e.pointerId !== dragId) return;
+    dragId = null;
+    if (travelled < TAP_SLOP) onTap();
+  });
+  canvas.addEventListener('pointercancel', (e) => {
+    if (e.pointerId === dragId) dragId = null;
+  });
+
   return {
     move: moveStick.value,
     show() {
       root.hidden = false;
       document.body.classList.add('touch-mode');
-    },
-    update(delta) {
-      const { x, y } = lookStick.value;
-      if (!x && !y) return;
-      // Squared response: small pushes turn slowly for fine aiming, a full push still turns at LOOK_RATE.
-      const rate = Math.hypot(x, y) * LOOK_RATE * delta;
-      look.turn(x * rate, y * rate);
     },
     // Small tappable prompt under the crosshair for whatever it's resting on; null hides it.
     setHoverAction(action) {

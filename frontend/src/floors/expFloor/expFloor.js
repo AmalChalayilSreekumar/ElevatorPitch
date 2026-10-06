@@ -41,7 +41,8 @@ function createStation() {
   return station;
 }
 
-export function createExpFloor(camera, look, experience) {
+// onComplete: called when the player finishes the whole ride and is let off at the station.
+export function createExpFloor(camera, look, experience, onComplete) {
   const group = new THREE.Group();
   const track = createTrack();
   const cart = createCart();
@@ -108,7 +109,10 @@ export function createExpFloor(camera, look, experience) {
 
   function arrive() {
     speed = 0;
-    if (nextStop === stops.length - 1) return dismount();
+    if (nextStop === stops.length - 1) {
+      dismount();
+      return onComplete?.();
+    }
     held = true;
     card.show(experience[nextStop], nextStop, experience.length);
   }
