@@ -3,23 +3,50 @@ import * as THREE from 'three';
 const postGeometry = new THREE.BoxGeometry(0.15, 1, 0.15);
 const postMaterial = new THREE.MeshLambertMaterial({ color: 0x2b2d42 });
 
+// The intro screen's pixel font (loaded in index.html).
+const FONT = '"Press Start 2P", monospace';
+const TEXT_WIDTH = 960;
+
+// Pixel fonts stay crisp at multiples of 8px, so shrink in those steps until the text fits rather than squashing it.
+function fitFont(ctx, text, start, min) {
+  let size = start;
+  ctx.font = `${size}px ${FONT}`;
+  while (size > min && ctx.measureText(text).width > TEXT_WIDTH) {
+    size -= 8;
+    ctx.font = `${size}px ${FONT}`;
+  }
+}
+
+function drawSign(ctx, title, subtitle, color) {
+  const { width, height } = ctx.canvas;
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  fitFont(ctx, title, 72, 32);
+  ctx.fillText(title, width / 2, 100, TEXT_WIDTH);
+  fitFont(ctx, subtitle, 40, 24);
+  ctx.fillText(subtitle, width / 2, 190, TEXT_WIDTH);
+}
+
 function signTexture(title, subtitle, color) {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
-
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 96px system-ui, sans-serif';
-  ctx.fillText(title, 512, 120, 960);
-  ctx.font = '56px system-ui, sans-serif';
-  ctx.fillText(subtitle, 512, 205, 960);
+  drawSign(ctx, title, subtitle, color);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+
+  // A canvas quietly falls back to another font if the web font isn't ready yet; redraw once it is.
+  if (!document.fonts.check(`40px ${FONT}`)) {
+    document.fonts.load(`40px ${FONT}`).then(() => {
+      drawSign(ctx, title, subtitle, color);
+      texture.needsUpdate = true;
+    });
+  }
   return texture;
 }
 

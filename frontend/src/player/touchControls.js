@@ -63,6 +63,12 @@ export function createTouchControls(look, canvas, onTap) {
       root.hidden = false;
       document.body.classList.add('touch-mode');
     },
+    // Hidden while movement is locked (riding the coaster, holding the gun), freeing the screen for cards.
+    setMoveEnabled(enabled) {
+      if (moveStick.el.hidden !== enabled) return;
+      moveStick.el.hidden = !enabled;
+      if (!enabled) moveStick.reset();
+    },
     // Small tappable prompt under the crosshair for whatever it's resting on; null hides it.
     setHoverAction(action) {
       if (action === hoverAction) return;

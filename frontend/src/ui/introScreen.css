@@ -98,9 +98,6 @@
   cursor: default;
 }
 
-.intro__prompt[hidden] {
-  display: none;
-}
 
 .intro__prompt-title {
   margin: 0 0 16px;

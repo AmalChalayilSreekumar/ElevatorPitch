@@ -9,13 +9,13 @@ const DISPLAYS = {
     floorDisplayOutside001: new THREE.Vector3(0, 0, -1),
 };
 
-// Label plate beside each panel button -> that button (GLTFLoader drops the '.' from Blender's 'Cube.001').
-// The buttons alone are small targets, so aiming at a plate presses its button.
-const BUTTON_LABELS = {
-    Cube: 'buttonInner1',
-    Cube001: 'buttonInner',
-    Cube002: 'buttonInner3',
-    Cube003: 'buttonInner2',
+// Panel button -> [label plate, label text, rim] around it (GLTFLoader drops the '.' from Blender's 'Cube.001').
+// The buttons alone are small targets, so aiming at any of their parts presses the button; the plate glows with it.
+const BUTTON_PARTS = {
+    buttonInner1: ['Cube', 'Text001', 'Cylinder001'], // Experience
+    buttonInner3: ['Cube002', 'Text002', 'Cylinder'], // Stack
+    buttonInner2: ['Cube003', 'Text', 'Cylinder003'], // Projects
+    buttonInner: ['Cube001', 'Text003', 'Cylinder002'], // Close door
 };
 
 // The car's outer front face (mButtonSquare.001 in ElevatorMain.glb), measured in world metres once placed.
@@ -29,7 +29,6 @@ const FACE_INSET = 0.01;
 
 // Meshes passed to setPulsing breathe with this soft backlight glow.
 const PULSE_COLOR = 0xfff1d6;
-const LABEL_FOR_BUTTON = Object.fromEntries(Object.entries(BUTTON_LABELS).map(([label, button]) => [button, label]));
 const PULSE_SPEED = 4;
 
 
@@ -96,10 +95,14 @@ export function createElevator(renderer, scene){
         );
         displays.forEach((show) => show(displayText));
 
-        for (const [labelName, buttonName] of Object.entries(BUTTON_LABELS)) {
-            const label = elevator.getObjectByName(labelName);
-            label.userData.interactive = true;
-            label.userData.pressTarget = elevator.getObjectByName(buttonName);
+        for (const [buttonName, partNames] of Object.entries(BUTTON_PARTS)) {
+            const button = elevator.getObjectByName(buttonName);
+            const parts = partNames.map((name) => elevator.getObjectByName(name));
+            for (const part of parts) {
+                part.userData.interactive = true;
+                part.userData.pressTarget = button;
+            }
+            button.userData.outline = [button, parts[0]];
         }
 
         model = elevator;
@@ -118,7 +121,7 @@ export function createElevator(renderer, scene){
     function applyPulse() {
         pulseMaterials.forEach((material) => { material.emissiveIntensity = 0; });
         // A pulsing button takes its label plate with it.
-        const names = pulseNames.flatMap((name) => (LABEL_FOR_BUTTON[name] ? [name, LABEL_FOR_BUTTON[name]] : [name]));
+        const names = pulseNames.flatMap((name) => (BUTTON_PARTS[name] ? [name, BUTTON_PARTS[name][0]] : [name]));
         pulseMaterials = names.map((name) => {
             const mesh = model.getObjectByName(name);
             // Own copy so the glow can't leak onto other meshes sharing the material.

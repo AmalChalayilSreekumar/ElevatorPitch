@@ -3,7 +3,6 @@
   --stick-bottom: max(24px, env(safe-area-inset-bottom));
 }
 
-.touch-controls[hidden] { display: none; }
 
 /* On-screen prompts sit above the stick in portrait; in landscape there's room beside it, which keeps the view clear. */
 .touch-mode .prompt__text {
@@ -97,7 +96,6 @@
   animation: touch-hover-in 0.15s ease-out;
 }
 
-.touch-hover[hidden] { display: none; }
 
 @keyframes touch-hover-in {
   from { opacity: 0; transform: translate(-50%, 4px); }

@@ -19,14 +19,21 @@ export function createTimelineCard() {
       const isLast = index === total - 1;
       const action = isTouch() ? 'Tap' : 'Space';
 
-      card.style.setProperty('--accent', job.color);
-      card.replaceChildren(
+      // Head and body sit side by side on landscape phones, stacked everywhere else.
+      const head = node('div', 'exp-card__head');
+      head.append(
         node('p', 'exp-card__stop', `Stop ${index + 1} of ${total}`),
         node('h2', 'exp-card__role', job.role),
         node('p', 'exp-card__company', job.company),
-        node('p', 'exp-card__meta', [job.period, job.location].filter(Boolean).join(' · ')),
-        node('p', null, job.summary),
-        highlights,
+        node('p', 'exp-card__meta', [job.period, job.location].filter(Boolean).join(' · '))
+      );
+      const body = node('div', 'exp-card__body');
+      body.append(node('p', null, job.summary), highlights);
+
+      card.style.setProperty('--accent', job.color);
+      card.replaceChildren(
+        head,
+        body,
         node('p', 'exp-card__hint', `${action} to ${isLast ? 'ride back to the station' : 'continue'}`)
       );
       card.hidden = false;

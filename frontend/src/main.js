@@ -1,7 +1,7 @@
 // main.js
 import * as THREE from 'three';
 import { initScene } from './core/scene.js';
-import { lookControls, movementControls } from './player/movement.js';
+import { lockPointer, lookControls, movementControls } from './player/movement.js';
 import { createTouchControls } from './player/touchControls.js';
 import { isTouch, setTouchMode } from './player/device.js';
 import { createElevator } from './objects/elevator/Elevator.js';
@@ -47,7 +47,7 @@ createIntroScreen(content.profile, (mode) => {
     touch.show();
     createRotateHint();
   } else {
-    Promise.resolve(renderer.domElement.requestPointerLock()).catch(() => {});
+    lockPointer(renderer.domElement);
   }
   playing = true;
   tutorial.start();
@@ -71,6 +71,7 @@ function animate() {
   floors.update(delta);
   if (playing) {
     touch?.setActions(floors.actions());
+    touch?.setMoveEnabled(!floors.controlsLocked());
     if (!floors.controlsLocked()) updateMovement(touch?.move);
   }
   hovered = updateOutline();

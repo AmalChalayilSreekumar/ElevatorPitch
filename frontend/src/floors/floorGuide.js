@@ -113,7 +113,7 @@ export function createFloorGuide(camera, look, elevator) {
 
       if (state === 'exploring') {
         if (!inCar()) elapsed += delta;
-        if (elapsed >= NUDGE_AFTER) startNudge('Seen enough here?');
+        if (elapsed >= NUDGE_AFTER) startNudge('');
       } else if (state === 'nudged' && inCar()) {
         startPickNext(false);
       } else if (state === 'pickNext' && !inCar()) {

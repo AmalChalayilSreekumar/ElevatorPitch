@@ -30,11 +30,14 @@ export function createJoystick(className) {
     value.y = (dy / radius) * scale;
   }
 
-  function release(e) {
-    if (e.pointerId !== pointerId) return;
+  function reset() {
     pointerId = null;
     value.x = value.y = 0;
     knob.style.transform = '';
+  }
+
+  function release(e) {
+    if (e.pointerId === pointerId) reset();
   }
 
   base.addEventListener('pointerdown', (e) => {
@@ -53,5 +56,5 @@ export function createJoystick(className) {
   base.addEventListener('pointerup', release);
   base.addEventListener('pointercancel', release);
 
-  return { el: base, value };
+  return { el: base, value, reset };
 }

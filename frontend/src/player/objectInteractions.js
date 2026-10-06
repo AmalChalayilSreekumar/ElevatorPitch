@@ -14,6 +14,17 @@ function findInteractive(object) {
     return null;
 }
 
+// Raycasts hit hidden meshes too; a hidden one must neither block the view nor be selectable.
+// That includes meshes hidden through their material, like the stack range's invisible walk barrier.
+function isShown(object) {
+    const materials = [object.material ?? []].flat();
+    if (materials.length && materials.every((material) => !material.visible)) return false;
+    for (let o = object; o; o = o.parent) {
+        if (!o.visible) return false;
+    }
+    return true;
+}
+
 export function objectInteraction(scene, camera, renderer) {
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -42,16 +53,15 @@ export function objectInteraction(scene, camera, renderer) {
         raycaster.setFromCamera(center, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
 
-        let newSelected = null;
-        for (let i = 0; i < intersects.length && !newSelected; i++) {
-            newSelected = findInteractive(intersects[i].object);
-        }
+        // Only the nearest visible surface counts, so walls (like the elevator's) block whatever is behind them.
+        const nearest = intersects.find(({ object }) => isShown(object));
+        const hit = nearest ? findInteractive(nearest.object) : null;
 
-        // A stand-in (e.g. a button's label plate) outlines itself and its target, and reports the target's name.
-        const target = newSelected?.userData.pressTarget ?? newSelected;
-        if (newSelected !== currentSelected) {
-            currentSelected = newSelected;
-            outlinePass.selectedObjects = !newSelected ? [] : target === newSelected ? [newSelected] : [newSelected, target];
+        // A stand-in (e.g. a button's label plate) acts as its target; userData.outline widens the highlight.
+        const target = hit?.userData.pressTarget ?? hit;
+        if (target !== currentSelected) {
+            currentSelected = target;
+            outlinePass.selectedObjects = target ? target.userData.outline ?? [target] : [];
         }
         return target?.name ?? null;
     }

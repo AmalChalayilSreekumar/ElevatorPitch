@@ -22,5 +22,5 @@ export const stack = [
   { name: 'TypeScript', image: '/stack/TypeScript.png', board: 'Languages' },
   { name: 'Three.js', image: '/stack/Three.js.png', board: 'Frameworks' },
   { name: 'Vite', image: '/stack/Vite.png', board: 'Frameworks' },
-  { name: 'Vite', image: '/stack/FastAPI.png', board: 'Frameworks' },
+  { name: 'FastAPI', image: '/stack/FastAPI.png', board: 'Frameworks' },
 ];

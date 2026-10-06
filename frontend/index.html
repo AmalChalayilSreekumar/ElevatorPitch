@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
+    /* The hidden attribute always wins, whatever display a component's layout sets. */
+    [hidden] { display: none !important; }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -93,13 +96,52 @@
     .exp-card__meta { padding-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); color: #b8bcc8; }
     .exp-card__hint { margin: 0; font-size: 14px; text-align: center; color: #b8bcc8; }
 
+    /* Mobile: everything scales with the screen, and the card stays clear of the Continue button below it. */
+    .touch-mode .exp-card {
+      top: calc(50% - 36px);
+      width: min(720px, calc(100vw - 32px));
+      max-height: calc(100vh - 104px);
+      max-height: calc(100dvh - 104px);
+      padding: clamp(12px, 3vh, 24px) clamp(14px, 4vw, 28px);
+      border-top-width: 6px;
+      font-size: clamp(13px, 1.6vh + 0.6vw, 16px);
+    }
+    .touch-mode .exp-card p { margin-bottom: clamp(4px, 1.2vh, 10px); }
+    .touch-mode .exp-card ul { margin-bottom: clamp(6px, 1.5vh, 14px); }
+    .touch-mode .exp-card li { margin-bottom: 2px; }
+    .touch-mode .exp-card__stop { font-size: 0.75em; }
+    .touch-mode .exp-card__role { font-size: clamp(20px, 3vh + 1.4vw, 36px); }
+    .touch-mode .exp-card__company { font-size: clamp(15px, 1.8vh + 0.8vw, 20px); }
+    .touch-mode .exp-card__meta { padding-bottom: clamp(6px, 1.5vh, 12px); }
+    .touch-mode .exp-card__hint { font-size: 0.85em; }
+
+    /* Landscape phones have width to spare but little height: put the job's details beside its title. */
+    @media (orientation: landscape) {
+      .touch-mode .exp-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+        column-gap: clamp(16px, 3vw, 28px);
+        align-items: start;
+      }
+      .touch-mode .exp-card__meta { margin-bottom: 0; border-bottom: 0; }
+      .touch-mode .exp-card__body { padding-left: clamp(16px, 3vw, 28px); border-left: 1px solid rgba(255, 255, 255, 0.12); }
+      .touch-mode .exp-card__hint { grid-column: 1 / -1; }
+    }
+
+    /* Very short screens (small phones sideways): tighter type, and the hint repeats the Continue button anyway. */
+    @media (orientation: landscape) and (max-height: 360px) {
+      .touch-mode .exp-card { font-size: 12px; line-height: 1.4; }
+      .touch-mode .exp-card__role { font-size: 18px; }
+      .touch-mode .exp-card__company { font-size: 14px; }
+      .touch-mode .exp-card__hint { display: none; }
+    }
+
     .prompt {
       position: fixed;
       inset: 0;
       pointer-events: none;
     }
 
-    .prompt[hidden] { display: none; }
 
     .prompt__text {
       position: absolute;
@@ -139,7 +181,6 @@
       animation: prompt-fade 0.25s ease-out;
     }
 
-    .toast[hidden] { display: none; }
 
     .prompt__actions {
       display: flex;
@@ -189,7 +230,6 @@
       right: 16px;
     }
 
-    .return-chip[hidden] { display: none; }
 
     @keyframes prompt-fade {
       from { opacity: 0; }
@@ -214,7 +254,6 @@
       pointer-events: none;
     }
 
-    .range-hud[hidden], .range-hud__toast[hidden] { display: none; }
     .range-hud__tally {
       margin: 0;
       padding: 6px 16px;
@@ -250,7 +289,6 @@
       animation: range-callout-in 0.3s ease-out, range-callout-bob 1.4s ease-in-out 0.3s infinite;
     }
 
-    .range-callout[hidden] { display: none; }
 
     @keyframes range-callout-in {
       from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }

@@ -4,8 +4,23 @@ import { isTouch } from './device.js';
 
 const MAX_PITCH = Math.PI / 2;
 const STEP = 0.2;
-// Pushing the move stick forward walks faster than keyboard W; phones have no Shift to sprint with.
+// The move stick walks faster than the keys in every direction, and faster still forward: phones have no Shift to sprint.
+const STICK_SPEED = 1.5;
 const STICK_FORWARD_BOOST = 2;
+
+// Chromium on Windows sometimes reports one huge, wrong-signed movement while the pointer is locked (when the hidden
+// OS cursor is re-centred). Real mouse events are tens of pixels at most, so anything bigger is dropped, not applied.
+const MAX_LOOK_STEP = 250;
+
+// Raw mouse input where supported (Chromium): bypasses the OS cursor that causes those spikes, and its acceleration.
+export function lockPointer(canvas) {
+  const plain = () => Promise.resolve(canvas.requestPointerLock()).catch(() => {});
+  try {
+    return Promise.resolve(canvas.requestPointerLock({ unadjustedMovement: true })).catch(plain);
+  } catch {
+    return plain();
+  }
+}
 
 export function lookControls(camera, renderer) {
   const sensitivity = 0.002;
@@ -19,13 +34,14 @@ export function lookControls(camera, renderer) {
     camera.rotation.set(pitch, yaw, 0);
   }
 
-  // Mobile mode looks with the right joystick and never locks the pointer (iOS doesn't implement it).
+  // Mobile mode looks by dragging (player/touchControls.js) and never locks the pointer (iOS doesn't implement it).
   renderer.domElement.addEventListener('click', () => {
-    if (!isTouch()) renderer.domElement.requestPointerLock();
+    if (!isTouch()) lockPointer(renderer.domElement);
   });
 
   document.addEventListener('mousemove', (e) => {
     if (document.pointerLockElement !== renderer.domElement) return;
+    if (Math.abs(e.movementX) > MAX_LOOK_STEP || Math.abs(e.movementY) > MAX_LOOK_STEP) return;
     turn(e.movementX * sensitivity, e.movementY * sensitivity);
   });
 
@@ -64,8 +80,8 @@ export function movementControls(camera, scene) {
         direction.x += STEP;
 
     if (stick) {
-      direction.x += stick.x * STEP;
-      direction.z += stick.y * STEP * (stick.y < 0 ? STICK_FORWARD_BOOST : 1);
+      direction.x += stick.x * STEP * STICK_SPEED;
+      direction.z += stick.y * STEP * STICK_SPEED * (stick.y < 0 ? STICK_FORWARD_BOOST : 1);
     }
 
     direction.applyEuler(camera.rotation);

@@ -72,12 +72,34 @@ function placeholderTexture(title) {
   });
 }
 
+// Phones often refuse to start a video outside a user gesture (always in iOS Low Power Mode or Android Data
+// Saver), which leaves its painting black. Any still-paused video is retried on every tap, click or key press,
+// where play() is always allowed, and whenever the projects floor is entered.
+const videos = new Set();
+
+export function playVideos() {
+  for (const el of videos) if (el.paused) el.play().catch(() => {});
+}
+
+document.addEventListener('pointerup', playVideos);
+document.addEventListener('keydown', playVideos);
+
+function createVideo(src) {
+  const el = document.createElement('video');
+  // Muted + inline as attributes too: iOS checks those before it will play without a gesture or fullscreen.
+  el.muted = el.defaultMuted = true;
+  el.setAttribute('muted', '');
+  el.setAttribute('playsinline', '');
+  Object.assign(el, { loop: true, playsInline: true, preload: 'auto', crossOrigin: 'anonymous', src });
+  videos.add(el);
+  return el;
+}
+
 function mediaTexture({ image, video, title }) {
   if (video) {
-    const el = document.createElement('video');
-    Object.assign(el, { src: video, muted: true, loop: true, playsInline: true, crossOrigin: 'anonymous' });
+    const el = createVideo(video);
     el.addEventListener('loadedmetadata', () => cover(texture, el.videoWidth / el.videoHeight), { once: true });
-    el.play().catch(() => {});
+    playVideos();
     const texture = new THREE.VideoTexture(el);
     texture.colorSpace = THREE.SRGBColorSpace;
     return texture;

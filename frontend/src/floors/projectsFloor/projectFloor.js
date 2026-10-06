@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { createPainting, prepareFrameTemplate } from './painting.js';
+import { createPainting, prepareFrameTemplate, playVideos } from './painting.js';
 import { createDoorwayWall } from '../doorwayWall.js';
 import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
 
@@ -28,9 +28,9 @@ const SIDE_CENTER_Z = (ROOM.frontZ + ROOM.backZ) / 2;
 // Projects fill these in order: back-wall centrepiece, then left wall, then right wall.
 // y is the frame centre above the floor; scale enlarges the frame together with its title and side panels.
 const WALL_SLOTS = [
-    { wall: 'back', along: 0, y: 1.75, scale: 1.8 },
-    { wall: 'left', along: SIDE_CENTER_Z, y: 1.75, scale: 1.8 },
-    { wall: 'right', along: SIDE_CENTER_Z, y: 1.75, scale: 1.8 },
+    { wall: 'back', along: 0, y: 1.95, scale: 1.8 },
+    { wall: 'left', along: SIDE_CENTER_Z, y: 1.95, scale: 1.8 },
+    { wall: 'right', along: SIDE_CENTER_Z, y: 1.95, scale: 1.8 },
 ];
 
 function hangPaintings(group, frameTemplate, projects) {
@@ -152,5 +152,6 @@ export function createProjectFloor(projects) {
         reject
     ));
 
-    return { group, ready, interactions };
+    // Videos the phone refused to start (or paused in the background) get another try on arrival.
+    return { group, ready, interactions, enter: playVideos };
 }
