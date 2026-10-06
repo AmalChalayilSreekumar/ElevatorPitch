@@ -4,7 +4,9 @@ import { isTouch } from './device.js';
 
 const MAX_PITCH = Math.PI / 2;
 const STEP = 0.2;
-// The move stick walks faster than the keys in every direction, and faster still forward: phones have no Shift to sprint.
+// Forward always runs (no Shift needed): the old Shift + W sprint speed.
+const RUN = STEP + 0.5;
+// The move stick walks faster than the keys in every direction, and faster still forward, close to W's run.
 const STICK_SPEED = 1.5;
 const STICK_FORWARD_BOOST = 2;
 
@@ -68,10 +70,8 @@ export function movementControls(camera, scene) {
     const speed = 0.1;
     direction.set(0, 0, 0);
 
-    if (keys['ShiftLeft'] && (keys['KeyW'] || keys['ArrowUp']))
-        direction.z -= 0.5;
     if (keys['KeyW'] || keys['ArrowUp'])
-        direction.z -= STEP;
+        direction.z -= RUN;
     if (keys['KeyS'] || keys['ArrowDown'])
         direction.z += STEP;
     if (keys['KeyA'] || keys['ArrowLeft'])

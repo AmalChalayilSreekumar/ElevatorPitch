@@ -4,6 +4,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { createPainting, prepareFrameTemplate, playVideos } from './painting.js';
 import { createDoorwayWall } from '../doorwayWall.js';
 import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
+import { openInNewTab } from '../../ui/openLink.js';
 
 // Short hall in world metres: the front wall sits flush with the elevator, paintings hang on the other three walls.
 const ROOM = {
@@ -48,7 +49,7 @@ function hangPaintings(group, frameTemplate, projects) {
         if (project.link) {
             painting.name = `project-${i}`;
             painting.userData.interactive = true;
-            interactions[painting.name] = () => window.open(project.link, '_blank', 'noopener');
+            interactions[painting.name] = () => openInNewTab(project.link);
         }
         group.add(painting);
     });

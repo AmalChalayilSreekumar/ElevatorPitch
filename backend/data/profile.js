@@ -7,7 +7,6 @@ export const profile = {
   ],
   controls: [
     ['WASD', 'Move'],
-    ['Shift', 'Sprint'],
     ['Mouse', 'Look around'],
     ['Click', 'Press buttons and interact'],
     ['Esc', 'Release the mouse'],

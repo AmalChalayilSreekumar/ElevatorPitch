@@ -21,6 +21,8 @@ const ACTIVE_TARGETS = 1;
 const RESPAWN_DELAY = 0.4;
 
 const SHOOTING_POSITION = new THREE.Vector3(0, 1.7, RANGE.counterZ + 0.8);
+// Where a winner is put once the whole stack has been hit, back from the counter (like the coaster's exit).
+const KICK_OUT_POSITION = new THREE.Vector3(0, 1.7, RANGE.counterZ + 2.2);
 const VIEWMODEL_OFFSET = new THREE.Vector3(0.2, -0.22, -0.45);
 const FIRE_COOLDOWN = 0.15;
 const RECOIL_RECOVERY = 6;
@@ -39,7 +41,8 @@ function createCounterGun() {
   return gun;
 }
 
-export function createStackFloor(camera, look, stack, stackBoards) {
+// onComplete: called when the player has hit every stack item and been put out of the booth.
+export function createStackFloor(camera, look, stack, stackBoards, onComplete) {
   const group = new THREE.Group();
   const slots = stack.map((entry, index) => ({ entry, index, target: createTarget(entry), point: -1 }));
   const slotByFace = new Map(slots.map((slot) => [slot.target.face, slot]));
@@ -58,7 +61,11 @@ export function createStackFloor(camera, look, stack, stackBoards) {
 
   const hud = createRangeHud(stack.length);
   const raycaster = new THREE.Raycaster();
+  // The current run: distinct stack items hit, plus every shot fired and how many hit (for accuracy).
   const hits = new Set();
+  let shots = 0;
+  let shotHits = 0;
+  const stats = () => ({ cleared: hits.size, shots, hits: shotHits });
 
   const rangeFog = new THREE.Fog(HALL_COLOR, 25, 60);
   const rangeBackground = new THREE.Color(HALL_COLOR);
@@ -96,7 +103,7 @@ export function createStackFloor(camera, look, stack, stackBoards) {
     counterGun.visible = false;
     counterGun.userData.interactive = false;
     viewmodel.visible = true;
-    hud.show();
+    hud.show(stats());
   }
 
   function putDown() {
@@ -115,15 +122,29 @@ export function createStackFloor(camera, look, stack, stackBoards) {
     cooldown = FIRE_COOLDOWN;
     recoil = 1;
 
+    shots++;
     raycaster.setFromCamera(AIM, camera);
     const [hit] = raycaster.intersectObjects(hittable(), false);
-    if (!hit) return;
+    if (!hit) return hud.miss(stats());
 
+    shotHits++;
     const slot = slotByFace.get(hit.object);
     slot.target.hit();
     hits.add(slot.index);
-    hud.hit(slot.entry.name, hits.size);
+    hud.hit(slot.entry.name, stats());
     respawns.push(RESPAWN_DELAY);
+    if (hits.size === stack.length) win();
+  }
+
+  // Whole stack hit: out of the booth with the final score, and the run starts over on the next pick-up.
+  function win() {
+    putDown();
+    camera.position.copy(KICK_OUT_POSITION);
+    look.reset();
+    hud.results({ shots, hits: shotHits });
+    hits.clear();
+    shots = shotHits = 0;
+    onComplete?.();
   }
 
   document.addEventListener('keydown', (e) => {

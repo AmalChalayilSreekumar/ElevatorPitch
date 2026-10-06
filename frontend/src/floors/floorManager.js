@@ -44,7 +44,7 @@ export function createFloorManager(scene, camera, look, elevator, content) {
     const factories = {
         projects: () => createProjectFloor(content.projects),
         experience: () => createExpFloor(camera, look, content.experience, () => guide.complete("That's the whole ride!")),
-        stack: () => createStackFloor(camera, look, content.stack, content.stackBoards),
+        stack: () => createStackFloor(camera, look, content.stack, content.stackBoards, () => guide.complete('Range cleared!')),
     };
     const floors = {};
     let current = null;

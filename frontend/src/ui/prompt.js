@@ -15,9 +15,10 @@ export function createPrompt(text, { actions = [], onClose } = {}) {
   const box = node('p', 'prompt__text');
   box.append(message);
 
-  if (actions.length) {
+  const actionButtons = actions.map(({ label, run }) => button('prompt__action', label, run));
+  if (actionButtons.length) {
     const bar = node('span', 'prompt__actions');
-    bar.append(...actions.map(({ label, run }) => button('prompt__action', label, run)));
+    bar.append(...actionButtons);
     box.append(bar);
   }
   if (onClose) {
@@ -41,6 +42,9 @@ export function createPrompt(text, { actions = [], onClose } = {}) {
     },
     setText(next) {
       if (message.textContent !== next) message.textContent = next;
+    },
+    setActionLabel(index, label) {
+      actionButtons[index].textContent = label;
     },
   };
 }

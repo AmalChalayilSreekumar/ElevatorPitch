@@ -7,10 +7,9 @@ export const experience = [
     location: 'Burlington, Ontario',
     summary: 'Created scripts and developed a production level full-stack application',
     highlights: [
-      'Created Automation application that saving 6-8 hours weekly',
+      'Created Automation application that saves 6-8 hours weekly',
       'Investigated electronic products to analyze software root causes',
-      'Invited to exclusive Evertz Young Engineering Society Golf Club (EYESGC) for exemplary work',
-    ],
+        ],
     color: '#e76f51',
   },
   {

@@ -268,6 +268,28 @@
     .range-hud__toast { margin: 0; font-size: 22px; font-weight: 700; color: #ffd166; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8); }
     .range-hud__hint { margin: 0; font-size: 13px; color: #b8bcc8; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8); }
 
+    .range-results {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: calc(100vw - 32px);
+      box-sizing: border-box;
+      padding: 12px 22px;
+      border-bottom: 4px solid #ff6b2c;
+      border-radius: 10px;
+      background: rgba(15, 18, 30, 0.9);
+      color: #f1f1f1;
+      font: 15px/1.45 system-ui, sans-serif;
+      text-align: center;
+      pointer-events: none;
+      animation: range-callout-in 0.35s ease-out;
+    }
+    .range-results p { margin: 0; }
+    .range-results__title { font-size: 22px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #ffd166; }
+    .range-results__score { margin-top: 4px; font-size: 16px; font-weight: 600; }
+
     .range-callout {
       position: fixed;
       top: calc(50% + 40px);
