@@ -10,10 +10,7 @@ import { createFloorManager } from './floors/floorManager.js';
 import { createIntroScreen } from './ui/introScreen.js';
 import { createTutorial } from './ui/tutorial.js';
 import { createRotateHint } from './ui/rotateHint.js';
-import { loadContent } from './api/content.js';
-
-// Fetched before any model starts loading, so the intro screen is listening when the loading manager finishes.
-const content = await loadContent();
+import { content } from './data/index.js';
 
 const { scene, camera, renderer } = initScene();
 
