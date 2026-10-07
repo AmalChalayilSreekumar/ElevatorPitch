@@ -8,7 +8,7 @@ export const projects = [
   {
     title: 'Autonomous Drone with Fruitfly Brain',
     description: 'A Brian2 neural network built from real FlyWire connectome data flies a drone, using a fly\'s escape and stabilization circuits. Controller runs on a PyBullet simulator or a real DJI Tello, with safety layer that overrides near obstacles. A YOLOv8 model finds and "eats" bananas.',
-    tech: ['Python', 'PyTorch', 'OpenCV'],
+    tech: ['Python', 'PyTorch', 'OpenCV', 'JupyterLab'],
     image: null,
     video: "/projects/DroneProjectTemp.mp4",
     link: 'https://github.com/Parth-Joshi0/Fly-Brain-Drone',
@@ -17,7 +17,7 @@ export const projects = [
   {
     title: 'Facial Detection Neural Network',
     description: 'One or two sentences on what it does and what you built.',
-    tech: ['Python', 'Matplotlib', 'PyTorch'],
+    tech: ['Python', 'Matplotlib', 'PyTorch', 'OpenCV'],
     image: null,
     video: '/projects/GeekedVsLocked.mp4',
     link: 'https://github.com/AmalChalayilSreekumar/GeekedVsLockedNeuralNet',

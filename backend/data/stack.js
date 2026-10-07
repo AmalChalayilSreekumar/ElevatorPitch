@@ -23,4 +23,5 @@ export const stack = [
   { name: 'Three.js', image: '/stack/Three.js.png', board: 'Frameworks' },
   { name: 'Vite', image: '/stack/Vite.png', board: 'Frameworks' },
   { name: 'FastAPI', image: '/stack/FastAPI.png', board: 'Frameworks' },
+  { name: 'Jupyter Lab', image: '/stack/JupyterLab.png', board: 'Data & ML' },
 ];

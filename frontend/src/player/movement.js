@@ -65,6 +65,12 @@ export function movementControls(camera, scene) {
   document.addEventListener('keydown', (e) => { keys[e.code] = true; });
   document.addEventListener('keyup',   (e) => { keys[e.code] = false; });
 
+  // A key released after focus leaves the page (e.g. a painting's link opening a new tab) sends its keyup to
+  // whatever has focus instead, so it would stay held here; let go of everything whenever the page loses focus.
+  const releaseKeys = () => { for (const code in keys) keys[code] = false; };
+  window.addEventListener('blur', releaseKeys);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseKeys(); });
+
   // stick: optional analog input in [-1, 1], x right and y down (towards the player), as the joystick reports it.
   return function update(stick) {
     const speed = 0.1;

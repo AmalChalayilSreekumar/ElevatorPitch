@@ -57,6 +57,15 @@ export function createTouchControls(look, canvas, onTap) {
     if (e.pointerId === dragId) dragId = null;
   });
 
+  // A finger lifted after the page loses focus (a link opening a new tab, switching apps) never reports its
+  // pointerup here, which would leave the stick walking or the drag stuck; let go of both instead.
+  const releaseTouches = () => {
+    moveStick.reset();
+    dragId = null;
+  };
+  window.addEventListener('blur', releaseTouches);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseTouches(); });
+
   return {
     move: moveStick.value,
     show() {
