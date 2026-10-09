@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { createPainting, prepareFrameTemplate, playVideos } from './painting.js';
+import { gltfLoader } from '../../core/loaders.js';
+import { createPainting, prepareFrameTemplate } from './painting.js';
 import { createDoorwayWall } from '../doorwayWall.js';
 import { ELEVATOR_FRONT } from '../../objects/elevator/Elevator.js';
 import { openInNewTab } from '../../ui/openLink.js';
+import { disposeObject } from '../../utils/dispose.js';
 
 // Short hall in world metres: the front wall sits flush with the elevator, paintings hang on the other three walls.
 const ROOM = {
@@ -34,7 +34,7 @@ const WALL_SLOTS = [
     { wall: 'right', along: SIDE_CENTER_Z, y: 1.95, scale: 1.8 },
 ];
 
-function hangPaintings(group, frameTemplate, projects) {
+function hangPaintings(group, frameTemplate, projects, videos) {
     const interactions = {};
     if (projects.length > WALL_SLOTS.length) {
         console.warn(`Projects floor has ${WALL_SLOTS.length} wall spots; ${projects.length - WALL_SLOTS.length} project(s) not hung.`);
@@ -42,7 +42,7 @@ function hangPaintings(group, frameTemplate, projects) {
 
     projects.slice(0, WALL_SLOTS.length).forEach((project, i) => {
         const { wall, along, y, scale } = WALL_SLOTS[i];
-        const painting = createPainting(project, frameTemplate, { scale });
+        const painting = createPainting(project, frameTemplate, { scale, videos });
         painting.position.set(...WALLS[wall].position(along, y));
         painting.rotation.y = WALLS[wall].rotationY;
 
@@ -90,11 +90,16 @@ function createRoom(materials) {
 }
 
 export function createProjectFloor(projects) {
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('./../../../draco/');
-
-    const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+    // Phones often refuse to start a video outside a user gesture (always in iOS Low Power Mode or Android Data
+    // Saver), which leaves its painting black. Any still-paused video is retried on every tap, click or key press,
+    // where play() is always allowed, and whenever the floor is entered.
+    const videos = new Set();
+    const playVideos = () => {
+        for (const el of videos) if (el.paused) el.play().catch(() => {});
+    };
+    const listeners = new AbortController();
+    document.addEventListener('pointerup', playVideos, { signal: listeners.signal });
+    document.addEventListener('keydown', playVideos, { signal: listeners.signal });
 
     const textureLoader = new THREE.TextureLoader();
     const overlayTexture = textureLoader.load(
@@ -140,11 +145,11 @@ export function createProjectFloor(projects) {
     const group = new THREE.Group();
     const interactions = {};
 
-    const ready = new Promise((resolve, reject) => loader.load(
+    const ready = new Promise((resolve, reject) => gltfLoader.load(
         "./../../../blenderFiles/ProjectsFloor/ProjectsFloor.glb",
         (gltf) => {
             const frameTemplate = prepareFrameTemplate(gltf.scene.getObjectByName('Picture_Frame'));
-            Object.assign(interactions, hangPaintings(group, frameTemplate, projects));
+            Object.assign(interactions, hangPaintings(group, frameTemplate, projects, videos));
 
             group.add(...createRoom({ wall: roofMaterial, ground: groundMaterial, backWall: backWallMaterial }));
             resolve();
@@ -153,6 +158,12 @@ export function createProjectFloor(projects) {
         reject
     ));
 
+    function dispose() {
+        listeners.abort();
+        disposeObject(group);
+        videos.clear();
+    }
+
     // Videos the phone refused to start (or paused in the background) get another try on arrival.
-    return { group, ready, interactions, enter: playVideos };
+    return { group, ready, interactions, enter: playVideos, dispose };
 }

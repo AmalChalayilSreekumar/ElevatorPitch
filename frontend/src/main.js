@@ -13,6 +13,8 @@ import { createRotateHint } from './ui/rotateHint.js';
 import { content } from './data/index.js';
 
 const { scene, camera, renderer } = initScene();
+// Dev builds only: lets renderer.info.memory be checked from the console when testing floor teardown.
+if (import.meta.env.DEV) window.renderer = renderer;
 
 const clock = new THREE.Clock();
 const elevator = createElevator(renderer, scene);

@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { gltfLoader } from '../../core/loaders.js';
 import { createFloorDisplay } from './floorDisplay.js';
 
 // Display mesh -> world direction its screen faces (into the car / out to the floor).
@@ -33,12 +32,6 @@ const PULSE_SPEED = 4;
 
 
 export function createElevator(renderer, scene){
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('./../../../draco/');
-
-    const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
-
     let mixer = null;
     let doorActions = [];
     let displays = [];
@@ -48,7 +41,7 @@ export function createElevator(renderer, scene){
     let pulseMaterials = [];
     let pulse = 0;
 
-    loader.load("./../../../blenderFiles/Elevator/ElevatorMain.glb", (gltf) => {
+    gltfLoader.load("./../../../blenderFiles/Elevator/ElevatorMain.glb", (gltf) => {
         const elevator = gltf.scene;
 
         // Door clips run forward to open and in reverse to close; they start paused on the closed pose.

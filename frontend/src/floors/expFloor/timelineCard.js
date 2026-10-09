@@ -41,5 +41,8 @@ export function createTimelineCard() {
     hide() {
       card.hidden = true;
     },
+    dispose() {
+      card.remove();
+    },
   };
 }

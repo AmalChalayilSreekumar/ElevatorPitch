@@ -72,19 +72,8 @@ function placeholderTexture(title) {
   });
 }
 
-// Phones often refuse to start a video outside a user gesture (always in iOS Low Power Mode or Android Data
-// Saver), which leaves its painting black. Any still-paused video is retried on every tap, click or key press,
-// where play() is always allowed, and whenever the projects floor is entered.
-const videos = new Set();
-
-export function playVideos() {
-  for (const el of videos) if (el.paused) el.play().catch(() => {});
-}
-
-document.addEventListener('pointerup', playVideos);
-document.addEventListener('keydown', playVideos);
-
-function createVideo(src) {
+// The floor collects its videos to retry play() on later gestures; see projectFloor.js.
+function createVideo(src, videos) {
   const el = document.createElement('video');
   // Muted + inline as attributes too: iOS checks those before it will play without a gesture or fullscreen.
   el.muted = el.defaultMuted = true;
@@ -92,14 +81,14 @@ function createVideo(src) {
   el.setAttribute('playsinline', '');
   Object.assign(el, { loop: true, playsInline: true, preload: 'auto', crossOrigin: 'anonymous', src });
   videos.add(el);
+  el.play().catch(() => {});
   return el;
 }
 
-function mediaTexture({ image, video, title }) {
+function mediaTexture({ image, video, title }, videos) {
   if (video) {
-    const el = createVideo(video);
+    const el = createVideo(video, videos);
     el.addEventListener('loadedmetadata', () => cover(texture, el.videoWidth / el.videoHeight), { once: true });
-    playVideos();
     const texture = new THREE.VideoTexture(el);
     texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
@@ -227,11 +216,11 @@ export function prepareFrameTemplate(frame) {
 }
 
 // A framed project facing local +Z: title above, tech stack column to the left, description to the right.
-// scale enlarges the whole arrangement.
-export function createPainting(project, frameTemplate, { scale = 1 } = {}) {
+// scale enlarges the whole arrangement; a video's element is added to videos.
+export function createPainting(project, frameTemplate, { scale = 1, videos }) {
   const frame = frameTemplate.userData.size;
 
-  const canvas = new THREE.Mesh(canvasGeometry, new THREE.MeshBasicMaterial({ map: mediaTexture(project) }));
+  const canvas = new THREE.Mesh(canvasGeometry, new THREE.MeshBasicMaterial({ map: mediaTexture(project, videos) }));
   canvas.position.z = 0.008;
 
   const title = panel(titleTexture(project.title, px(frame.x), px(TITLE_HEIGHT)), frame.x, TITLE_HEIGHT);

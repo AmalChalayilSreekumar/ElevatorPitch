@@ -73,5 +73,12 @@ export function createRangeHud(total) {
       clearTimeout(resultsTimer);
       resultsTimer = setTimeout(() => { results.hidden = true; }, RESULTS_MS);
     },
+    dispose() {
+      clearTimeout(toastTimer);
+      clearTimeout(resultsTimer);
+      hud.remove();
+      callout.remove();
+      results.remove();
+    },
   };
 }

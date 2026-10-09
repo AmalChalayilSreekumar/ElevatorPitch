@@ -36,9 +36,10 @@ const NO_ACTIONS = [];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Every floor returns { group, ready, enter?, exit?, update?, interactions?, controlsLocked?, primary?, actions? }.
+// Every floor returns { group, ready, dispose, enter?, exit?, update?, interactions?, controlsLocked?, primary?, actions? }.
 // primary() gets first say on a click/tap and returns true if it used it; actions() returns a stable array of
-// { label, run } for the touch context buttons.
+// { label, run } for the touch context buttons. dispose() frees its GPU resources, listeners and overlays.
+// Only the current floor stays built: leaving one disposes it, and a revisit rebuilds it during the ride.
 export function createFloorManager(scene, camera, look, elevator, content) {
     const guide = createFloorGuide(camera, look, elevator);
     const factories = {
@@ -84,6 +85,8 @@ export function createFloorManager(scene, camera, look, elevator, content) {
             if (current) {
                 scene.remove(current.group);
                 current.exit?.(scene);
+                current.dispose();
+                delete floors[currentName];
             }
             current = floors[name];
             currentName = name;

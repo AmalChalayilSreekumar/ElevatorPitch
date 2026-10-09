@@ -4,6 +4,7 @@ import { createTarget } from './target.js';
 import { createGun, createMuzzleFlash } from './gun.js';
 import { createRangeHud } from './rangeHud.js';
 import { createStackBoards } from './boards.js';
+import { disposeObject } from '../../utils/dispose.js';
 
 // Targets float at these spots downrange; each pop-up picks a free one, never the spot just used.
 // Needs at least ACTIVE_TARGETS + 1 entries.
@@ -147,12 +148,19 @@ export function createStackFloor(camera, look, stack, stackBoards, onComplete) {
     onComplete?.();
   }
 
+  const listeners = new AbortController();
   document.addEventListener('keydown', (e) => {
     if (e.code === 'KeyE') putDown();
-  });
+  }, { signal: listeners.signal });
   document.addEventListener('pointerlockchange', () => {
     if (!document.pointerLockElement) putDown();
-  });
+  }, { signal: listeners.signal });
+
+  function dispose() {
+    listeners.abort();
+    hud.dispose();
+    disposeObject(group);
+  }
 
   function enter(scene) {
     outside = { fog: scene.fog, background: scene.background };
@@ -192,6 +200,7 @@ export function createStackFloor(camera, look, stack, stackBoards, onComplete) {
     ready: Promise.resolve(),
     enter,
     exit,
+    dispose,
     update,
     interactions: { rangeGun: pickUp },
     controlsLocked: () => armed,

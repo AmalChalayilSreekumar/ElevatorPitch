@@ -5,6 +5,7 @@ import { createSign } from './sign.js';
 import { createTimelineCard } from './timelineCard.js';
 import { createHall } from './hall.js';
 import { isTouch } from '../../player/device.js';
+import { disposeObject } from '../../utils/dispose.js';
 
 const GRAVITY = 9.8;
 // Lift speed up to the first peak, and the speed the cart crests at.
@@ -75,7 +76,13 @@ export function createExpFloor(camera, look, experience, onComplete) {
     scene.background = hallBackground;
   }
 
+  // The camera rides inside the cart, so it must be back in the scene before this floor is torn down.
   function exit(scene) {
+    if (riding) {
+      held = false;
+      card.hide();
+      dismount();
+    }
     scene.fog = outside.fog;
     scene.background = outside.background;
   }
@@ -124,9 +131,16 @@ export function createExpFloor(camera, look, experience, onComplete) {
     card.hide();
   }
 
+  const listeners = new AbortController();
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') resume();
-  });
+  }, { signal: listeners.signal });
+
+  function dispose() {
+    listeners.abort();
+    card.dispose();
+    disposeObject(group);
+  }
 
   function update(delta) {
     if (!riding || held) return;
@@ -150,6 +164,7 @@ export function createExpFloor(camera, look, experience, onComplete) {
     ready: Promise.resolve(),
     enter,
     exit,
+    dispose,
     update,
     interactions: { coasterCart: board },
     controlsLocked: () => riding,
