@@ -32,13 +32,4 @@ export const projects = [
     link: "https://github.com/AmalChalayilSreekumar/ElevatorPitch",
     contributors: ['Amal Chalayil Sreekumar'],
   },
-  {
-    title: 'Project Four',
-    description: 'One or two sentences on what it does and what you built.',
-    tech: ['Tech', 'Stack'],
-    image: null,
-    video: null,
-    link: null,
-    contributors: [],
-  },
 ];
