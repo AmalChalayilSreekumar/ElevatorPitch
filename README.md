@@ -3,7 +3,7 @@
 
 A first-person portfolio you walk around in, built with Three.js.
 
-**[Live site](https://<amals-elevator-pitch.com>)**
+**[Website Link](https://<amals-elevator-pitch.com>)**
 
 ## What it is
 
