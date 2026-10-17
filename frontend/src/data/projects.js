@@ -25,7 +25,7 @@ export const projects = [
   },
   {
     title: 'This Website',
-    description: 'An interactive 3D elevator portfolio built with Three.js and Blender, where each floor (a project gallery, a career roller coaster and a tech-stack shooting range) turns a resume into something you can explore.',
+    description: 'An interactive 3D portfolio built with Three.js and Blender. ',
     tech: ['Three.js', 'Vite', 'JavaScript'],
     image: null,
     video: "/projects/websiteDemo.mp4",

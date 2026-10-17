@@ -10,6 +10,7 @@ import { createFloorManager } from './floors/floorManager.js';
 import { createIntroScreen } from './ui/introScreen.js';
 import { createTutorial } from './ui/tutorial.js';
 import { createRotateHint } from './ui/rotateHint.js';
+import { createHoverHint } from './ui/hoverHint.js';
 import { content } from './data/index.js';
 
 const { scene, camera, renderer } = initScene();
@@ -52,8 +53,9 @@ createIntroScreen(content.profile, (mode) => {
   tutorial.start();
 });
 
-const { composer, updateOutline } = objectInteraction(scene, camera, renderer);
+const { composer, updateOutline, hoverDistance } = objectInteraction(scene, camera, renderer);
 let hovered = null;
+const hoverHint = createHoverHint();
 
 // Desktop clicks count once the pointer is locked (the first click only locks it); mobile taps come from touch controls.
 renderer.domElement.addEventListener('pointerdown', (e) => {
@@ -75,6 +77,7 @@ function animate() {
   }
   hovered = updateOutline();
   touch?.setHoverAction(floors.touchPrompt(hovered));
+  hoverHint.set(playing ? floors.hoverHint(hovered) : null, hoverDistance());
   composer.render();
 }
 

@@ -17,6 +17,8 @@ const ROOM = {
 
 const HANG_GAP = 0.01;
 
+const PAINTING_HINT = 'Click or tap painting for more information';
+
 // Where each wall's paintings hang, facing into the room. `along` runs across the wall: x on the back wall, z on the sides.
 const WALLS = {
     back: { rotationY: 0, position: (along, y) => [along, y, ROOM.backZ + HANG_GAP] },
@@ -36,6 +38,7 @@ const WALL_SLOTS = [
 
 function hangPaintings(group, frameTemplate, projects, videos) {
     const interactions = {};
+    const hints = {};
     if (projects.length > WALL_SLOTS.length) {
         console.warn(`Projects floor has ${WALL_SLOTS.length} wall spots; ${projects.length - WALL_SLOTS.length} project(s) not hung.`);
     }
@@ -50,11 +53,12 @@ function hangPaintings(group, frameTemplate, projects, videos) {
             painting.name = `project-${i}`;
             painting.userData.interactive = true;
             interactions[painting.name] = () => openInNewTab(project.link);
+            hints[painting.name] = PAINTING_HINT;
         }
         group.add(painting);
     });
 
-    return interactions;
+    return { interactions, hints };
 }
 
 function createRoom(materials) {
@@ -144,12 +148,15 @@ export function createProjectFloor(projects) {
 
     const group = new THREE.Group();
     const interactions = {};
+    const hints = {};
 
     const ready = new Promise((resolve, reject) => gltfLoader.load(
         "./../../../blenderFiles/ProjectsFloor/ProjectsFloor.glb",
         (gltf) => {
             const frameTemplate = prepareFrameTemplate(gltf.scene.getObjectByName('Picture_Frame'));
-            Object.assign(interactions, hangPaintings(group, frameTemplate, projects, videos));
+            const hung = hangPaintings(group, frameTemplate, projects, videos);
+            Object.assign(interactions, hung.interactions);
+            Object.assign(hints, hung.hints);
 
             group.add(...createRoom({ wall: roofMaterial, ground: groundMaterial, backWall: backWallMaterial }));
             resolve();
@@ -165,5 +172,5 @@ export function createProjectFloor(projects) {
     }
 
     // Videos the phone refused to start (or paused in the background) get another try on arrival.
-    return { group, ready, interactions, enter: playVideos, dispose };
+    return { group, ready, interactions, hints, enter: playVideos, dispose };
 }

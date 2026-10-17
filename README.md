@@ -1,4 +1,3 @@
-<!-- Replace <your-domain> on the next line with the real domain before pushing. -->
 # Elevator Pitch
 
 A first-person portfolio you walk around in, built with Three.js.

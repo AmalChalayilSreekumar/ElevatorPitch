@@ -44,6 +44,7 @@ export function objectInteraction(scene, camera, renderer) {
     raycaster.far = 10;
     const center = new THREE.Vector2(0, 0);
     let currentSelected = null;
+    let hoverDistance = Infinity;
 
     window.addEventListener('resize', () => {
         composer.setSize(window.innerWidth, window.innerHeight);
@@ -56,6 +57,7 @@ export function objectInteraction(scene, camera, renderer) {
         // Only the nearest visible surface counts, so walls (like the elevator's) block whatever is behind them.
         const nearest = intersects.find(({ object }) => isShown(object));
         const hit = nearest ? findInteractive(nearest.object) : null;
+        hoverDistance = hit ? nearest.distance : Infinity;
 
         // A stand-in (e.g. a button's label plate) acts as its target; userData.outline widens the highlight.
         const target = hit?.userData.pressTarget ?? hit;
@@ -66,5 +68,6 @@ export function objectInteraction(scene, camera, renderer) {
         return target?.name ?? null;
     }
 
-    return { composer, updateOutline };
+    // Metres from the camera to the point under the crosshair on the hovered object.
+    return { composer, updateOutline, hoverDistance: () => hoverDistance };
 }
